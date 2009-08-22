@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:jk="http://tomcat.apache.org"
+	xmlns:jxb="http://java.sun.com/xml/ns/jaxb" 
+	jxb:version="2.0"
+	elementFormDefault="qualified">
+
+	<xsd:element name="status" type="JkStatusType" />
+	
+	<xsd:complexType name="Hosts">
+		<xsd:sequence>
+			<xsd:element name="Host" type="HostType" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="loadBalancer" type="xsd:string" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="HostType">
+		<xsd:attribute name="hostname" type="xsd:string" />
+		<xsd:attribute name="ipAddress" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkStatusType">
+		<xsd:sequence>
+			<xsd:element name="server" type="JkServerType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="software" type="JkSoftwareType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="balancers" type="JkBalancersType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="result" type="JkResultType" minOccurs="1" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="JkServerType">
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkSoftwareType">
+		<xsd:attribute name="web_server" type="xsd:string" />
+		<xsd:attribute name="jk_version" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkBalancersType">
+		<xsd:sequence>
+			<xsd:element name="balancer" type="JkBalancerType" />
+		</xsd:sequence>
+		<xsd:attribute name="count" type="xsd:int" />
+	</xsd:complexType>
+
+
+	<xsd:complexType name="JkBalancerType">
+		<xsd:sequence>
+			<xsd:element name="member" type="JkMemberType" maxOccurs="unbounded" />
+			<xsd:element name="map" type="JkMapType" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="sticky_session" type="xsd:string" />
+		<xsd:attribute name="sticky_session_force" type="xsd:string" />
+		<xsd:attribute name="retries" type="xsd:int" />
+		<xsd:attribute name="recover_time" type="xsd:int" />
+		<xsd:attribute name="max_reply_timeouts" type="xsd:int" />
+		<xsd:attribute name="method" type="xsd:string" />
+		<xsd:attribute name="lock" type="xsd:string" />
+		<xsd:attribute name="member_count" type="xsd:int" />
+		<xsd:attribute name="good" type="xsd:int" />
+		<xsd:attribute name="degraded" type="xsd:int" />
+		<xsd:attribute name="bad" type="xsd:int" />
+		<xsd:attribute name="busy" type="xsd:int" />
+		<xsd:attribute name="max_busy" type="xsd:int" />
+		<xsd:attribute name="map_count" type="xsd:int" />
+		<xsd:attribute name="time_to_maintenance_min" type="xsd:int" />
+		<xsd:attribute name="time_to_maintenance_max" type="xsd:int" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkMemberType">
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="host" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:string" />
+		<xsd:attribute name="address" type="xsd:string" />
+		<xsd:attribute name="activation" type="xsd:string" />
+		<xsd:attribute name="lbfactor" type="xsd:int" />
+		<xsd:attribute name="route" type="xsd:string" />
+		<xsd:attribute name="redirect" type="xsd:string" />
+		<xsd:attribute name="domain" type="xsd:string" />
+		<xsd:attribute name="distance" type="xsd:int" />
+		<xsd:attribute name="state" type="xsd:string" />
+		<xsd:attribute name="lbmult" type="xsd:int" />
+		<xsd:attribute name="lbvalue" type="xsd:int" />
+		<xsd:attribute name="elected" type="xsd:int" />
+		<xsd:attribute name="errors" type="xsd:int" />
+		<xsd:attribute name="client_errors" type="xsd:int" />
+		<xsd:attribute name="reply_timeouts" type="xsd:int" />
+		<xsd:attribute name="transferred" type="xsd:int" />
+		<xsd:attribute name="read" type="xsd:int" />
+		<xsd:attribute name="busy" type="xsd:int" />
+		<xsd:attribute name="max_busy" type="xsd:int" />
+		<xsd:attribute name="time_to_recover_min" type="xsd:int" />
+		<xsd:attribute name="time_to_recover_max" type="xsd:int" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkMapType">
+		<xsd:attribute name="id" type="xsd:int" />
+		<xsd:attribute name="server" type="xsd:string" />
+		<xsd:attribute name="uri" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="source" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="JkResultType">
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="message" type="xsd:string" />
+	</xsd:complexType>
+</xsd:schema>
