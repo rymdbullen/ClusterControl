@@ -6,8 +6,6 @@
 	jxb:version="2.0"
 	elementFormDefault="qualified">
 
-	<xsd:element name="status" type="JkStatusType" />
-	
 	<xsd:complexType name="Hosts">
 		<xsd:sequence>
 			<xsd:element name="Host" type="HostType" maxOccurs="unbounded" />
@@ -21,6 +19,8 @@
 		<xsd:attribute name="port" type="xsd:string" />
 	</xsd:complexType>
 
+	<xsd:element name="status" type="JkStatusType" />
+	
 	<xsd:complexType name="JkStatusType">
 		<xsd:sequence>
 			<xsd:element name="server" type="JkServerType" minOccurs="0" maxOccurs="1" />

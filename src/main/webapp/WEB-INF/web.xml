@@ -13,11 +13,11 @@
         <filter-class>net.sourceforge.stripes.controller.StripesFilter</filter-class>
         <init-param>
             <param-name>ActionResolver.Packages</param-name>
-            <param-value>myGroup.action,se.avegagroup.clustercontrol</param-value>
+            <param-value>se.avegagroup.clustercontrol.logic</param-value>
         </init-param>
         <init-param>
             <param-name>Extension.Packages</param-name>
-            <param-value>myGroup.extensions, myGroup.reload.extensions, se.avegagroup.clustercontrol.extensions, se.avegagroup.clustercontrol.reload.extensions, net.sourceforge.stripes.integration.spring</param-value>
+            <param-value>se.avegagroup.clustercontrol.logic.extensions, se.avegagroup.clustercontrol.logic.reload.extensions, net.sourceforge.stripes.integration.spring</param-value>
         </init-param>
     </filter>
 

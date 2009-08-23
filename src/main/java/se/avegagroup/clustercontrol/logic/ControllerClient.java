@@ -85,8 +85,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] activate(String loadBalancer, String worker) {
-
+	public static ArrayList<String[]> activate(String loadBalancer, String worker) {
 		//
 		// Perform the activate action
 		String activateParameters = StringUtil.getActivateParameters(loadBalancer, worker);
@@ -110,7 +109,7 @@ public class ControllerClient {
 		//
 		// wait for x seconds
 		try {
-			System.out.println("Hello Mac!");
+			System.out.println("Hello Mac! ACTIVATE");
 			// Sleep for 3 seconds
 			// Thread.sleep() must be within a try - catch block
 			Thread.sleep(3000);
@@ -126,7 +125,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] activate(String worker) {
+	public static ArrayList<String[]> activate(String worker) {
 		return activate(_hosts.getLoadBalancer(), worker);
 	}
 
@@ -136,7 +135,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] disable(String loadBalancer, String worker) {
+	public static ArrayList<String[]> disable(String loadBalancer, String worker) {
 		String disableParameters = StringUtil.getDisableParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		String[] workerLists = executeUrls(disableParameters + "&" + xmlMimeParameters);
@@ -163,7 +162,7 @@ public class ControllerClient {
 		//
 		// wait for x seconds
 		try {
-			System.out.println("Hello Mac!");
+			System.out.println("Hello Mac! DISABLE");
 			// Sleep for 3 seconds
 			// Thread.sleep() must be within a try - catch block
 			Thread.sleep(3000);
@@ -179,7 +178,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] disable(String worker) {
+	public static ArrayList<String[]> disable(String worker) {
 		return disable(_hosts.getLoadBalancer(), worker);
 	}
 
@@ -189,9 +188,42 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] stop(String loadBalancer, String worker) {
-		String targetUrl = StringUtil.getStopParameters(loadBalancer, worker);
-		return executeUrls(targetUrl);
+	public static ArrayList<String[]> stop(String loadBalancer, String worker) {
+		String stopParameters = StringUtil.getStopParameters(loadBalancer, worker);
+		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
+		String[] workerLists = executeUrls(stopParameters + "&" + xmlMimeParameters);
+
+		//
+		// process the activate action responses
+		for (int index = 0; index < workerLists.length; index++) {
+			String workerList = workerLists[index];
+			WorkerStatus workerStatus = new WorkerStatus();
+			try {
+				JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
+				JkResultType result = jkStatus.getValue().getResult();
+				if (result.getType().equals("OK")) {
+					System.out.println("Worker: '" + worker + "' stopped OK!");
+				} else {
+					System.out.println("Worker: '" + worker + "' stopped NOK!");
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+				System.out.println("Error in:\r\n"+workerList);
+			}
+		}
+
+		//
+		// wait for x seconds
+		try {
+			System.out.println("Hello Mac! STOP");
+			// Sleep for 3 seconds
+			// Thread.sleep() must be within a try - catch block
+			Thread.sleep(3000);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		return status();
 	}
 
 	/**
@@ -199,7 +231,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] stop(String worker) {
+	public static ArrayList<String[]> stop(String worker) {
 		return stop(_hosts.getLoadBalancer(), worker);
 	}
 
@@ -208,26 +240,32 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static String[] status() {
-		ArrayList<String> resultList = new ArrayList<String>();
+	public static ArrayList<String[]> status() {
+		/** List of statuses like 0,0 - 1,0 */
+		ArrayList<String[]> resultList = new ArrayList<String[]>();
+		
 		//
 		// retrieve the statuses
 		String[] workerLists = executeUrls(StringUtil.getMimeXmlParameters());
 		int workerListCount = workerLists.length;
 		for (int workerListIdx = 0; workerListIdx < workerListCount; workerListIdx++) {
+			//ArrayList<String> memberList = new ArrayList<String>();
 			String workerList = workerLists[workerListIdx];
 			WorkerStatus workerStatus = new WorkerStatus();
 			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
 			JkResultType result = jkStatus.getValue().getResult();
 			int memberCount = jkStatus.getValue().getBalancers().getBalancer().getMemberCount();
+			String[] memberList = new String[memberCount]; 
 			for (int memberIdx = 0; memberIdx < memberCount; memberIdx++) {
 				JkMemberType member = jkStatus.getValue().getBalancers().getBalancer().getMember().get(memberIdx);
 				System.out.println("Worker: '" + member.getName() + "' activation: "+member.getActivation()+" state: "+member.getState()+" busy: "+member.getBusy());
 				System.out.println("Result: "+result.getType());
-				resultList.add(result.getType());
+				//memberList.add(result.getType());
+				memberList[memberIdx] = result.getType();
 			}
+			resultList.add(memberList);
 		}
-		return resultList.toArray(new String[resultList.size()]);
+		return resultList;
 	}
 
 	/**

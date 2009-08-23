@@ -3,6 +3,7 @@
  */
 package se.avegagroup.clustercontrol.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class WorkerStatusTest extends TestCase {
 			Iterator<JkMemberType> membersIter = members.iterator();
 			while (membersIter.hasNext()) {
 				JkMemberType jkMember = (JkMemberType) membersIter.next();
-				System.out.println(jkMember.getName());
+				System.out.println(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 			}
 		}
 	}
@@ -64,12 +65,14 @@ public class WorkerStatusTest extends TestCase {
 	 */
 	public void testActivateUnmarshall() {
 		String worker = "footprint1";
-		String[] workerLists = ControllerClient.activate(worker);
-		
-		for (int index = 0; index < workerLists.length; index++) {
-			String workerStatus = workerLists[index];
-			System.out.println("["+index+"]: "+workerStatus);
-			assertEquals("OK", workerStatus);
+		ArrayList<String[]> workerLists = ControllerClient.activate(worker);
+		for (int i = 0; i < workerLists.size(); i++) {
+			String[] workerList = workerLists.get(i);
+			for (int index = 0; index < workerList.length; index++) {
+				String workerStatus = workerList[index];
+				System.out.println("["+index+"]: "+workerStatus);
+				assertEquals("OK", workerStatus);
+			}
 		}
 	}
 	/**
@@ -77,12 +80,14 @@ public class WorkerStatusTest extends TestCase {
 	 */
 	public void testDisableUnmarshall() {
 		String worker = "footprint1";
-		String[] workerLists = ControllerClient.disable(worker);
-		
-		for (int index = 0; index < workerLists.length; index++) {
-			String workerStatus = workerLists[index];
-			System.out.println("["+index+"]: "+workerStatus);
-			assertEquals("OK", workerStatus);
+		ArrayList<String[]> workerLists = ControllerClient.disable(worker);
+		for (int i = 0; i < workerLists.size(); i++) {
+			String[] workerList = workerLists.get(i);
+			for (int index = 0; index < workerList.length; index++) {
+				String workerStatus = workerList[index];
+				System.out.println("["+index+"]: "+workerStatus);
+				assertEquals("OK", workerStatus);
+			}
 		}
 	}
 }

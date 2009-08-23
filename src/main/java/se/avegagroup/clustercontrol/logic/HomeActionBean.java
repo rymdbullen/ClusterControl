@@ -1,10 +1,8 @@
-package myGroup.action;
+package se.avegagroup.clustercontrol.logic;
 
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 
-// Referenced classes of package myGroup.action:
-//            BaseActionBean
 
 public class HomeActionBean extends BaseActionBean {
 

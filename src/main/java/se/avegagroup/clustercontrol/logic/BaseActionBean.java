@@ -1,4 +1,4 @@
-package myGroup.action;
+package se.avegagroup.clustercontrol.logic;
 
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
