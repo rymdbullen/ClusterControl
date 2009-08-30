@@ -8,7 +8,7 @@
 
 	<xsd:complexType name="Hosts">
 		<xsd:sequence>
-			<xsd:element name="Host" type="HostType" maxOccurs="unbounded" />
+			<xsd:element name="Host" type="HostType" minOccurs="0" maxOccurs="unbounded" />
 		</xsd:sequence>
 		<xsd:attribute name="loadBalancer" type="xsd:string" />
 	</xsd:complexType>

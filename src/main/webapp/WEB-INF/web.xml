@@ -8,6 +8,7 @@
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 
+
     <filter>
         <filter-name>StripesFilter</filter-name>
         <filter-class>net.sourceforge.stripes.controller.StripesFilter</filter-class>
@@ -20,7 +21,6 @@
             <param-value>se.avegagroup.clustercontrol.logic.extensions, se.avegagroup.clustercontrol.logic.reload.extensions, net.sourceforge.stripes.integration.spring</param-value>
         </init-param>
     </filter>
-
     <servlet>
         <servlet-name>DispatcherServlet</servlet-name>
         <servlet-class>net.sourceforge.stripes.controller.DispatcherServlet</servlet-class>
@@ -42,7 +42,7 @@
         </init-param>
          -->		
 	</servlet>
-
+ 
     <filter-mapping>
         <filter-name>StripesFilter</filter-name>
         <servlet-name>DispatcherServlet</servlet-name>

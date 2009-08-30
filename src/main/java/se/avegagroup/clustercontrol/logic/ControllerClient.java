@@ -33,6 +33,19 @@ public class ControllerClient {
 	private static Hosts _hosts = null;
 
 	/**
+	 * initializes the 
+	 */
+	public static void init(String hostname) {
+		Hosts hosts = new Hosts();
+		HostType host = new HostType();
+		host.setHostname("name");
+		host.setIpAddress(hostname);
+		host.setPort("8888");
+		hosts.getHost().add(host);
+		
+		_hosts = hosts;  
+	}
+	/**
 	 * 
 	 * @param worker
 	 * @return

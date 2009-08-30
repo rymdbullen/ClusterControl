@@ -11,11 +11,11 @@ public class ConfigManager {
 	/**
 	 * initializes the 
 	 */
-	public static void init() {
+	public static void init(String hostname) {
 		Hosts hosts = new Hosts();
 		HostType host = new HostType();
 		host.setHostname("name");
-		host.setIpAddress("localhost");
+		host.setIpAddress(hostname);
 		host.setPort("8888");
 		
 		_hosts = hosts;  
