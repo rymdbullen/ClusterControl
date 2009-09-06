@@ -33,7 +33,7 @@ public class ControllerClient {
 	private static Hosts _hosts = null;
 
 	/**
-	 * initializes the 
+	 * initializes the host config
 	 */
 	public static void init(String hostname) {
 		Hosts hosts = new Hosts();
@@ -81,8 +81,7 @@ public class ControllerClient {
 		try {
 			HttpGet httpget = new HttpGet(targetUrl);
 			org.apache.http.client.ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			responseBody = (String) httpclient
-					.execute(httpget, responseHandler);
+			responseBody = (String) httpclient.execute(httpget, responseHandler);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

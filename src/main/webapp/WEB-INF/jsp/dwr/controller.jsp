@@ -4,13 +4,24 @@
   <s:layout-component name="body">
     <script>
     	function init() {
+          alert("running init");
     	  dwr.util.useLoadingMessage();
     	}
         function getStatus() {
       	  	var name = ""; //dwr.util.getValue("demoName");
       	  	JkController.getStatus(name, function(data) {
-      	    dwr.util.setValue("demoReply", data);
+      	    dwr.util.setValue("demoStatus", data);
       	  });
+      	}
+        function functionRenderStatus(data) {
+            alert(data);
+//        	for (var i = 0; i < people.length; i++) {            	
+//              	dwr.util.setValue("demoStatus", data);
+//        	}
+        }
+        function getStatusComplex() {
+      	  	var name = dwr.util.getValue("demoName");
+      	  	JkController.getStatusComplex(name, functionRenderStatus);
       	}
         function activate() {
       	  	var loadBalancer = dwr.util.getValue("loadBalancer");
@@ -29,14 +40,15 @@
         function setHostname() {
       	  	var hostname = dwr.util.getValue("hostname");
       	  	JkController.setHostname(hostname, function(data) {
-      	    dwr.util.setValue("demoReply", data);
+      	    dwr.util.setValue("demoStatus", data);
       	  });
       	}
     </script>
     <p>JK Status</p>
 	<p>
 	  Hostname:
-	  <input type="text" id="hostname"/>
+	  <input type="text" id="hostname"/><input value="Set Hostname" type="button" onclick="setHostname()"/>
+	  <br/>
 	  <br/>
 	  loadbalancer, workername
 	  <input type="text" id="loadBalancer"/><input type="text" id="workerName"/>
@@ -45,11 +57,15 @@
 	  <br/>
 	  <input value="Disable" type="button" onclick="disable()"/>
 	  <br/>
-	  <input value="Set Hostname" type="button" onclick="setHostname()"/>
 	  <br/>
 	  <input value="Status" type="button" onclick="getStatus()"/>
 	  <br/>
+	  <br/>
+	  <input value="StatusComplex" type="button" onclick="getStatusComplex()"/>
+	  <br/>
 	  Reply: <span id="demoReply"></span>
+	  <br/>
+	  Status: <span id="demoStatus"></span>
 	</p>
   </s:layout-component>
 </s:layout-render>

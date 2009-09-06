@@ -79,13 +79,16 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return
 	 */
 	public static String activate(String loadBalancer, String worker) {
-		ArrayList<String[]> hostsStatus = ControllerClient.activate(loadBalancer, worker);
+		ArrayList<String[]> workerLists = ControllerClient.activate(loadBalancer, worker);
 		String status = "";
-		int workerIdx = 0;
-		for (int hostIdx = 0; hostIdx < hostsStatus.size(); hostIdx++) {
-			String[] hostStatus = hostsStatus.get(hostIdx);
-			status = status+"["+hostIdx+"]["+workerIdx+"]: "+hostStatus;
-			workerIdx++;
+		for (int hostIdx = 0; hostIdx < workerLists.size(); hostIdx++) {
+			String[] workerList = workerLists.get(hostIdx);
+			int workerIdx = 0;
+			for (int i = 0; i < workerList.length; i++) {
+				String hostStatus = workerList[i];
+				status = status+"["+hostIdx+"]["+workerIdx+"]: "+hostStatus;
+				workerIdx++;
+			}
 		}
 		return status;
 	}
@@ -113,6 +116,23 @@ public class ControllerActionBean extends BaseActionBean {
 			}
 		}
 		return status;
+	}
+	/**
+	 * returns the status of the workers for all nodes
+	 * @return
+	 */
+	public static List<JkMemberType> getStatusComplex(String host) {
+		String[] bodys = ControllerClient.status("xml");
+		
+		WorkerStatus workerStatus = new WorkerStatus();
+		for (int hostIdx = 0; hostIdx < bodys.length; hostIdx++) {
+			String body = bodys[hostIdx];
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(body);
+			JkBalancersType balancers =  jkStatus.getValue().getBalancers();
+			List<JkMemberType> members = balancers.getBalancer().getMember();
+			return members;
+		}
+		return null;
 	}
 	/**
 	 * 

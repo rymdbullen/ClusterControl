@@ -4,11 +4,9 @@
 
 <dwr>
   <allow>
-    <create creator="new" javascript="JDate">
-      <param name="class" value="java.util.Date"/>
-    </create>
-    <create creator="new" javascript="JkController">
+    <create creator="new" javascript="JkController" scope="script">
       <param name="class" value="se.avegagroup.clustercontrol.logic.ControllerActionBean"/>
     </create>
+	<convert match="sse.avegagroup.clustercontrol.data.JkMemberType" converter="bean"/>
   </allow>
 </dwr>
