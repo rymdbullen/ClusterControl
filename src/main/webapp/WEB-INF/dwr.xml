@@ -7,6 +7,6 @@
     <create creator="new" javascript="JkController" scope="script">
       <param name="class" value="se.avegagroup.clustercontrol.logic.ControllerActionBean"/>
     </create>
-	<convert match="sse.avegagroup.clustercontrol.data.JkMemberType" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.data.JkMemberType" converter="bean"/>
   </allow>
 </dwr>
