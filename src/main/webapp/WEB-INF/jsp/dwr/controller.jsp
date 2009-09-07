@@ -13,11 +13,13 @@
       	    dwr.util.setValue("demoStatus", data);
       	  });
       	}
-        function functionRenderStatus(data) {
-            alert(data);
-//        	for (var i = 0; i < people.length; i++) {            	
-//              	dwr.util.setValue("demoStatus", data);
-//        	}
+        function functionRenderStatus(members) {
+            //alert(members);
+            var member;
+        	for (var i = 0; i < members.length; i++) {
+            	member = members[i];           	
+              	dwr.util.setValue("demoStatus", member.name);
+        	}
         }
         function getStatusComplex() {
       	  	var name = dwr.util.getValue("demoName");
