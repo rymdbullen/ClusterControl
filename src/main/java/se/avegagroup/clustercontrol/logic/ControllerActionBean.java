@@ -3,7 +3,6 @@ package se.avegagroup.clustercontrol.logic;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import se.avegagroup.clustercontrol.data.JkBalancerType;
-import se.avegagroup.clustercontrol.data.JkBalancersType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
 import se.avegagroup.clustercontrol.data.JkStatusType;
 import se.avegagroup.clustercontrol.util.StringUtil;
@@ -42,19 +40,8 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @param worker
 	 * @return
 	 */
-	public static String stop(String loadBalancer, String worker) {
-		ArrayList<String[]> workerLists = ControllerClient.stop(loadBalancer, worker);
-		String status = "";
-		for (int hostIdx = 0; hostIdx < workerLists.size(); hostIdx++) {
-			String[] workerList = workerLists.get(hostIdx);
-			int workerIdx = 0;
-			for (int i = 0; i < workerList.length; i++) {
-				String hostStatus = workerList[i];
-				status = status+"["+hostIdx+"]["+workerIdx+"]: "+hostStatus;
-				workerIdx++;
-			}
-		}
-		return status;
+	public static List<JkBalancerType> stop(String loadBalancer, String worker) {
+		return ControllerClient.stop(loadBalancer, worker);
 	}
 	/**
 	 * 
@@ -73,23 +60,6 @@ public class ControllerActionBean extends BaseActionBean {
 	 */
 	public static List<JkBalancerType> activate(String loadBalancer, String worker) {
 		return ControllerClient.activate(loadBalancer, worker);
-	}
-	/**
-	 * returns the status of the workers for all nodes
-	 * @return
-	 */
-	public static List<JkMemberType> getStatusComplex2() {
-		String[] bodys = ControllerClient.status("xml");
-		
-		WorkerStatus workerStatus = new WorkerStatus();
-		for (int hostIdx = 0; hostIdx < bodys.length; hostIdx++) {
-			String body = bodys[hostIdx];
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(body);
-			JkBalancersType balancers =  jkStatus.getValue().getBalancers();
-			List<JkMemberType> members = balancers.getBalancer().getMember();
-			return members;
-		}
-		return null;
 	}
 	/**
 	 * returns the balancers for a host

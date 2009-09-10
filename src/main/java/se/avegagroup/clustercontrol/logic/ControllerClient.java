@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
@@ -145,30 +146,7 @@ public class ControllerClient {
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		String[] workerLists = executeUrls(activateParameters + "&" + xmlMimeParameters);
 
-		//
-		// process the activate action responses
-		for (int index = 0; index < workerLists.length; index++) {
-			String workerList = workerLists[index];
-			WorkerStatus workerStatus = new WorkerStatus();
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
-			JkResultType result = jkStatus.getValue().getResult();
-			if (result.getType().equals("OK")) {
-				System.out.println("Worker: '" + worker + "' activated OK!");
-			} else {
-				System.out.println("Worker: '" + worker + "' activated NOK!");
-			}
-		}
-
-		//
-		// wait for x seconds
-		try {
-			System.out.println("Hello Mac! ACTIVATE");
-			// Sleep for 3 seconds
-			// Thread.sleep() must be within a try - catch block
-			Thread.sleep(3000);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+		parseStatusAndPause(workerLists, worker);
 
 		return statusComplex();
 	}
@@ -189,43 +167,43 @@ public class ControllerClient {
 	 * @return
 	 */
 	public static ArrayList<JkBalancerType> disable(String loadBalancer, String worker) {
+		//
+		// Perform the disable action
 		String disableParameters = StringUtil.getDisableParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		String[] workerLists = executeUrls(disableParameters + "&" + xmlMimeParameters);
 
+		parseStatusAndPause(workerLists, worker);
+
+		return statusComplex();
+	}
+
+	private static void parseStatusAndPause(String[] workerLists, String worker) {
 		//
-		// process the activate action responses
+		// process the disable action responses
 		for (int index = 0; index < workerLists.length; index++) {
 			String workerList = workerLists[index];
 			WorkerStatus workerStatus = new WorkerStatus();
-			try {
-				JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
-				JkResultType result = jkStatus.getValue().getResult();
-				if (result.getType().equals("OK")) {
-					System.out.println("Worker: '" + worker + "' disabled OK!");
-				} else {
-					System.out.println("Worker: '" + worker + "' disabled NOK!");
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-				System.out.println("Error in:\r\n"+workerList);
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
+			JkResultType result = jkStatus.getValue().getResult();
+			if (result.getType().equals("OK")) {
+				System.out.println("Worker: '" + worker + "' action OK!");
+			} else {
+				System.out.println("Worker: '" + worker + "' action NOK!");
 			}
 		}
 
 		//
 		// wait for x seconds
 		try {
-			System.out.println("Hello Mac! DISABLE");
+			System.out.println("Hello Mac! ACTIVATE");
 			// Sleep for 3 seconds
 			// Thread.sleep() must be within a try - catch block
 			Thread.sleep(3000);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-
-		return statusComplex();
 	}
-
 	/**
 	 * 
 	 * @param worker
@@ -241,42 +219,14 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> stop(String loadBalancer, String worker) {
+	public static List<JkBalancerType> stop(String loadBalancer, String worker) {
 		String stopParameters = StringUtil.getStopParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		String[] workerLists = executeUrls(stopParameters + "&" + xmlMimeParameters);
 
-		//
-		// process the activate action responses
-		for (int index = 0; index < workerLists.length; index++) {
-			String workerList = workerLists[index];
-			WorkerStatus workerStatus = new WorkerStatus();
-			try {
-				JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
-				JkResultType result = jkStatus.getValue().getResult();
-				if (result.getType().equals("OK")) {
-					System.out.println("Worker: '" + worker + "' stopped OK!");
-				} else {
-					System.out.println("Worker: '" + worker + "' stopped NOK!");
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-				System.out.println("Error in:\r\n"+workerList);
-			}
-		}
+		parseStatusAndPause(workerLists, worker);
 
-		//
-		// wait for x seconds
-		try {
-			System.out.println("Hello Mac! STOP");
-			// Sleep for 3 seconds
-			// Thread.sleep() must be within a try - catch block
-			Thread.sleep(3000);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-
-		return status();
+		return statusComplex();
 	}
 
 	/**
@@ -284,7 +234,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> stop(String worker) {
+	public static List<JkBalancerType> stop(String worker) {
 		return stop(_hosts.getLoadBalancer(), worker);
 	}
 	/**
