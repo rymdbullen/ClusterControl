@@ -1,5 +1,7 @@
 package se.avegagroup.clustercontrol.logic;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,18 +13,20 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkBalancersType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
 import se.avegagroup.clustercontrol.data.JkStatusType;
+import se.avegagroup.clustercontrol.util.StringUtil;
 import se.avegagroup.clustercontrol.util.WorkerStatus;
 
 @UrlBinding("/Controller.htm")
 public class ControllerActionBean extends BaseActionBean {
 
-	private static final Log logger = LogFactory.getLog(ControllerActionBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
 	/**
 	 * 
@@ -58,19 +62,8 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @param worker
 	 * @return
 	 */
-	public static String disable(String loadBalancer, String worker) {
-		ArrayList<String[]> workerLists = ControllerClient.disable(loadBalancer, worker);
-		String status = "";
-		for (int hostIdx = 0; hostIdx < workerLists.size(); hostIdx++) {
-			String[] workerList = workerLists.get(hostIdx);
-			int workerIdx = 0;
-			for (int i = 0; i < workerList.length; i++) {
-				String hostStatus = workerList[i];
-				status = status+"["+hostIdx+"]["+workerIdx+"]: "+hostStatus;
-				workerIdx++;
-			}
-		}
-		return status;
+	public static List<JkBalancerType> disable(String loadBalancer, String worker) {
+		return ControllerClient.disable(loadBalancer, worker);
 	}
 	/**
 	 * 
@@ -78,50 +71,14 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @param worker
 	 * @return
 	 */
-	public static String activate(String loadBalancer, String worker) {
-		ArrayList<String[]> workerLists = ControllerClient.activate(loadBalancer, worker);
-		String status = "";
-		for (int hostIdx = 0; hostIdx < workerLists.size(); hostIdx++) {
-			String[] workerList = workerLists.get(hostIdx);
-			int workerIdx = 0;
-			for (int i = 0; i < workerList.length; i++) {
-				String hostStatus = workerList[i];
-				status = status+"["+hostIdx+"]["+workerIdx+"]: "+hostStatus;
-				workerIdx++;
-			}
-		}
-		return status;
+	public static List<JkBalancerType> activate(String loadBalancer, String worker) {
+		return ControllerClient.activate(loadBalancer, worker);
 	}
 	/**
 	 * returns the status of the workers for all nodes
 	 * @return
 	 */
-	public static String getStatus(String host) {
-		String[] bodys = ControllerClient.status("xml");
-		
-		String status = ""; 
-		WorkerStatus workerStatus = new WorkerStatus();
-		for (int hostIdx = 0; hostIdx < bodys.length; hostIdx++) {
-			String body = bodys[hostIdx];
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(body);
-			JkBalancersType balancers =  jkStatus.getValue().getBalancers();
-			List<JkMemberType> members = balancers.getBalancer().getMember();
-			Iterator<JkMemberType> membersIter = members.iterator();
-			int workerIdx = 0;
-			while (membersIter.hasNext()) {
-				JkMemberType jkMember = (JkMemberType) membersIter.next();
-				System.out.println(jkMember.getName()+": "+jkMember.getActivation()+" "+jkMember.getBusy());
-				status = status+"["+hostIdx+"]["+workerIdx+"]: "+jkMember.getActivation()+" "+jkMember.getBusy();
-				workerIdx++;
-			}
-		}
-		return status;
-	}
-	/**
-	 * returns the status of the workers for all nodes
-	 * @return
-	 */
-	public static List<JkMemberType> getStatusComplex(String host) {
+	public static List<JkMemberType> getStatusComplex2() {
 		String[] bodys = ControllerClient.status("xml");
 		
 		WorkerStatus workerStatus = new WorkerStatus();
@@ -135,12 +92,67 @@ public class ControllerActionBean extends BaseActionBean {
 		return null;
 	}
 	/**
+	 * returns the balancers for a host
+	 * @return
+	 */
+	public static ArrayList<JkBalancerType> getStatusComplex(String host) {
+		String[] bodys = ControllerClient.status("xml");
+		
+		ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(bodys.length);
+		WorkerStatus workerStatus = new WorkerStatus();
+		for (int hostIdx = 0; hostIdx < bodys.length; hostIdx++) {
+			String body = bodys[hostIdx];
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(body);
+			balancers.add(jkStatus.getValue().getBalancers().getBalancer());
+		}
+		return balancers;
+	}
+	/**
+	 * Initializes the application and returns 
+	 * @param url the initialization url
+	 * @return 
+	 */
+	public static ArrayList<JkBalancerType> setUrl(String url) {
+		URL urll;
+		try {
+			urll = new URL(url);
+			ControllerClient.init(urll);
+			return getStatusComplex("");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	/**
 	 * 
 	 * @param hostname
 	 * @return
 	 */
 	public String setHostname(String hostname) {
-		ControllerClient.init(hostname);
-		return "OK";
+		//
+		// try to get rest of hosts...
+		List<JkBalancerType> balancers = getStatusComplex("");
+		ArrayList<String> hosts = new ArrayList<String>(1);
+		for (int balancerIdx = 0; balancerIdx < balancers.size(); balancerIdx++) {
+			JkBalancerType balancer = balancers.get(balancerIdx);
+			List<JkMemberType> members = balancer.getMember();
+			for (int memberIdx = 0; memberIdx < members.size(); memberIdx++) {
+				JkMemberType member = members.get(memberIdx);
+				String host = member.getHost();
+				host = StringUtil.getAddress(host);
+				if(false==hosts.contains(host)) {
+					hosts.add(host);
+				}
+			}
+		}
+		if(hosts.size()>1) {
+			System.out.println("WEE HAVEE MOREE THAN ONEE");
+		} else {
+			System.out.println("ONLY ONEE");
+		}
+		//String status = ControllerClient.init(hosts);
+		
+		return "status";
 	}
 }

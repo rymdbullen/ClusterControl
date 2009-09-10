@@ -14,7 +14,7 @@
 	</xsd:complexType>
 	
 	<xsd:complexType name="HostType">
-		<xsd:attribute name="hostname" type="xsd:string" />
+		<xsd:attribute name="context" type="xsd:string" />
 		<xsd:attribute name="ipAddress" type="xsd:string" />
 		<xsd:attribute name="port" type="xsd:string" />
 	</xsd:complexType>

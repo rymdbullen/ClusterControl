@@ -1,7 +1,5 @@
 package se.avegagroup.clustercontrol.util;
 
-import se.avegagroup.clustercontrol.logic.ConfigManager;
-
 public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 
 	private static final String WORKER_STOP = "2";
@@ -53,18 +51,47 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 		return "mime=txt&opt=4";
 	}
 
-	public static String createTargetUrlReadOnly(String host) {
-		String parametersReadOnly = "cmd=list&opt=36";
-		return createTargetUrl(host, parametersReadOnly);
+	/**
+	 * 
+	 * @param host
+	 * @return
+	 */
+	public static String getAddress(String host) {
+		String strippedHost = host.replaceAll("(:\\d{1,6})", "");
+System.out.println(strippedHost);
+		return strippedHost;
 	}
-
-	public static String createTargetUrl(String host, String parameters) {
-		String targetPort = "";
-		if ("8888" != null) {
-			targetPort = ":8888";
+	/**
+	 * Returns the port
+	 * @param host
+	 * @return
+	 */
+	public static String getPort(String host) {
+		String strippedPort = host.replaceAll("([\\.\\d]*:)", "");
+System.out.println(strippedPort);
+		return strippedPort;
+	}
+	/**
+	 * Returns the ipaddress and the port of the url.
+	 * @param url
+	 * @return
+	 */
+	public static String getHostAndPort(String url) {
+		String hostAndPort = url.replaceAll("http[s]{0,1}://", "");
+		hostAndPort = hostAndPort.replaceAll("(/.*)", "");
+		return hostAndPort;
+	}
+	/**
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static String checkPath(String path) {
+		int lastIndex = path.lastIndexOf("/");
+		if(lastIndex==0) {
+			return path;
 		}
-		String targetHost = "http://"+ host + targetPort;
-		String targetContext = "/"+ConfigManager.getJkContext() + "?" + parameters;
-		return targetHost + targetContext;
+		String context = path.substring(0, lastIndex);
+		return context;
 	}
 }

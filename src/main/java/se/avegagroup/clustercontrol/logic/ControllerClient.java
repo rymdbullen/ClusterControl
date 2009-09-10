@@ -1,6 +1,7 @@
 package se.avegagroup.clustercontrol.logic;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -16,6 +17,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import se.avegagroup.clustercontrol.data.Hosts;
 import se.avegagroup.clustercontrol.data.HostType;
+import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
 import se.avegagroup.clustercontrol.data.JkResultType;
 import se.avegagroup.clustercontrol.data.JkStatusType;
@@ -30,20 +32,59 @@ public class ControllerClient {
 	private static final String RESPONSE_FORMAT_PROPERTIES = "prop";
 	private static final String RESPONSE_FORMAT_TEXT = "txt";
 
-	private static Hosts _hosts = null;
+	private static Hosts _hosts = new Hosts();
 
 	/**
-	 * initializes the host config
+	 * initializes the Controller Client host config
+	 * @param url
+	 * @return 
 	 */
-	public static void init(String hostname) {
-		Hosts hosts = new Hosts();
+	public static ArrayList<JkBalancerType> init(URL url) {
 		HostType host = new HostType();
-		host.setHostname("name");
-		host.setIpAddress(hostname);
-		host.setPort("8888");
-		hosts.getHost().add(host);
+		host.setIpAddress(url.getHost());
+		host.setPort(""+url.getPort());
+		String jkContext = StringUtil.checkPath(url.getPath());
+		host.setContext(""+jkContext);
+		_hosts.getHost().add(host);
+
+		return statusComplex();
+	}
+	/**
+	 * 
+	 * @param loadBalancer
+	 * @param hostnames
+	 * @return
+	 */
+	public static String init(String loadBalancer, ArrayList<HostType> hostnames) {
+		for (int i = 0; i < hostnames.size(); i++) {
+			_hosts.getHost().add(hostnames.get(i));
+		}
+		_hosts.setLoadBalancer(loadBalancer);
 		
-		_hosts = hosts;  
+		//ArrayList<String[]> statuses = status();
+		
+		return "OK";
+	}
+
+	/**
+	 * initializes the Controller Client host config
+	 */
+	public static String init(String loadBalancer, String[] hostnames) {
+		for (int i = 0; i < hostnames.length; i++) {
+			String hostname = hostnames[i];
+			String ipAddress = StringUtil.getAddress(hostname);
+			String port = StringUtil.getPort(hostname);
+			HostType host = new HostType();
+//host.setHostname("name");
+			host.setIpAddress(ipAddress);
+			host.setPort(port);
+			_hosts.getHost().add(host);
+		}
+		_hosts.setLoadBalancer(loadBalancer);
+		
+		//ArrayList<String[]> statuses = status();
+		
+		return "OK";
 	}
 	/**
 	 * 
@@ -71,7 +112,7 @@ public class ControllerClient {
 	 * @return the response, ie html body
 	 */
 	public static String executeUrl(HostType host, String parameters) {
-		String targetUrl = StringUtil.createTargetUrl(host.getIpAddress(), parameters);
+		String targetUrl = createTargetUrl(host, parameters);
 		logger.debug("executing request " + targetUrl);
 		System.out.println("executing request " + targetUrl);
 
@@ -97,7 +138,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> activate(String loadBalancer, String worker) {
+	public static ArrayList<JkBalancerType> activate(String loadBalancer, String worker) {
 		//
 		// Perform the activate action
 		String activateParameters = StringUtil.getActivateParameters(loadBalancer, worker);
@@ -129,7 +170,7 @@ public class ControllerClient {
 			System.out.println(e.getMessage());
 		}
 
-		return status();
+		return statusComplex();
 	}
 
 	/**
@@ -137,7 +178,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> activate(String worker) {
+	public static ArrayList<JkBalancerType> activate(String worker) {
 		return activate(_hosts.getLoadBalancer(), worker);
 	}
 
@@ -147,7 +188,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> disable(String loadBalancer, String worker) {
+	public static ArrayList<JkBalancerType> disable(String loadBalancer, String worker) {
 		String disableParameters = StringUtil.getDisableParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		String[] workerLists = executeUrls(disableParameters + "&" + xmlMimeParameters);
@@ -182,7 +223,7 @@ public class ControllerClient {
 			System.out.println(e.getMessage());
 		}
 
-		return status();
+		return statusComplex();
 	}
 
 	/**
@@ -190,7 +231,7 @@ public class ControllerClient {
 	 * @param worker
 	 * @return
 	 */
-	public static ArrayList<String[]> disable(String worker) {
+	public static ArrayList<JkBalancerType> disable(String worker) {
 		return disable(_hosts.getLoadBalancer(), worker);
 	}
 
@@ -246,7 +287,32 @@ public class ControllerClient {
 	public static ArrayList<String[]> stop(String worker) {
 		return stop(_hosts.getLoadBalancer(), worker);
 	}
-
+	/**
+	 * 
+	 * @param worker
+	 * @return
+	 */
+	public static ArrayList<JkBalancerType> statusComplex() {
+		/** List of statuses like 0,0 - 1,0 */
+		ArrayList<JkBalancerType> resultList = new ArrayList<JkBalancerType>();
+		
+		//
+		// retrieve the statuses
+		String[] workerLists = executeUrls(StringUtil.getMimeXmlParameters());
+		int workerListCount = workerLists.length;
+		for (int workerListIdx = 0; workerListIdx < workerListCount; workerListIdx++) {
+			String workerList = workerLists[workerListIdx];
+			WorkerStatus workerStatus = new WorkerStatus();
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
+			JkResultType result = jkStatus.getValue().getResult();
+			if(result.getType().equals("NOK")) {
+				//throw new WorkerNotFoundException();
+				return null;
+			}
+			resultList.add(jkStatus.getValue().getBalancers().getBalancer());
+		}
+		return resultList;
+	}
 	/**
 	 * 
 	 * @param worker
@@ -333,5 +399,31 @@ public class ControllerClient {
 	 */
 	public Hosts getHosts() {
 		return _hosts;
+	}
+	/**
+	 * 
+	 * @param host
+	 * @return
+	 */
+//	public static String createTargetUrlReadOnly(String host) {
+//		String parametersReadOnly = "cmd=list&opt=36";
+//		return createTargetUrl(host, parametersReadOnly);
+//	}
+	/**
+	 * 
+	 * @param host
+	 * @param port
+	 * @param jkContext
+	 * @param parameters
+	 * @return
+	 */
+	public static String createTargetUrl(HostType host, String parameters) {
+		String port = host.getPort();
+		if (false==port.trim().equals("")) {
+			port = ":"+port;
+		}
+		String targetHost = "http://"+ host.getIpAddress() + port;
+		String targetContext = "/"+host.getContext() + "?" + parameters;
+		return targetHost + targetContext;
 	}
 }

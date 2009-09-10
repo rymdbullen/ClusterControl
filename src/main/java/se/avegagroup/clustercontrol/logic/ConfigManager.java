@@ -11,23 +11,23 @@ public class ConfigManager {
 	/**
 	 * initializes the 
 	 */
-	public static void init(String hostname) {
+	public static void indit(String hostname) {
 		Hosts hosts = new Hosts();
 		HostType host = new HostType();
-		host.setHostname("name");
+		//host.setHostname("name");
 		host.setIpAddress(hostname);
 		host.setPort("8888");
 		
 		_hosts = hosts;  
 	}
-	public static Hosts getHosts() {
+	public static Hosts getdHosts() {
 		return _hosts;
 	}
 	/**
 	 * 
 	 * @return
 	 */
-	public static String getJkContext() {
+	public static String getJdkContext() {
 		return _context;
 	}
 
