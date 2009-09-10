@@ -19,7 +19,7 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 		return parameters;
 	}
 	/**
-	 * 
+	 * Adds update parameters to 
 	 * @param loadBalancer
 	 * @param worker
 	 * @param command
@@ -52,9 +52,9 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 	}
 
 	/**
-	 * 
-	 * @param host
-	 * @return
+	 * Returns the ipaddress from host including possible port
+	 * @param host the complete host including possible port
+	 * @return the ipaddress
 	 */
 	public static String getAddress(String host) {
 		String strippedHost = host.replaceAll("(:\\d{1,6})", "");
@@ -62,9 +62,9 @@ System.out.println(strippedHost);
 		return strippedHost;
 	}
 	/**
-	 * Returns the port
-	 * @param host
-	 * @return
+	 * Returns the port from host including possible port
+	 * @param host the complete host including possible port
+	 * @return the port
 	 */
 	public static String getPort(String host) {
 		String strippedPort = host.replaceAll("([\\.\\d]*:)", "");
@@ -72,19 +72,9 @@ System.out.println(strippedPort);
 		return strippedPort;
 	}
 	/**
-	 * Returns the ipaddress and the port of the url.
-	 * @param url
-	 * @return
-	 */
-	public static String getHostAndPort(String url) {
-		String hostAndPort = url.replaceAll("http[s]{0,1}://", "");
-		hostAndPort = hostAndPort.replaceAll("(/.*)", "");
-		return hostAndPort;
-	}
-	/**
-	 * 
-	 * @param path
-	 * @return
+	 * Checks and assures that the context not ends with a slash 
+	 * @param path the path to check
+	 * @return a correct context
 	 */
 	public static String checkPath(String path) {
 		int lastIndex = path.lastIndexOf("/");

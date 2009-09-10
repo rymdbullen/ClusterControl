@@ -55,8 +55,10 @@ public class ControllerClientTest extends TestCase {
 			JkBalancerType workerList = workerLists.get(i);
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
-				System.out.println("["+index+"]: "+workerStatus.getActivation());
-				assertEquals("ACT", workerStatus.getActivation());
+				if(worker.equals(workerStatus.getName())) {
+					assertEquals("ACT", workerStatus.getActivation());
+				}
+				System.out.println("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
@@ -70,8 +72,10 @@ public class ControllerClientTest extends TestCase {
 			JkBalancerType workerList = workerLists.get(i);
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
-				System.out.println("["+index+"]: "+workerStatus.getActivation());
-				assertEquals("OK", workerStatus);
+				if(worker.equals(workerStatus.getName())) {
+					assertEquals("DIS", workerStatus.getActivation());
+				}
+				System.out.println("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}

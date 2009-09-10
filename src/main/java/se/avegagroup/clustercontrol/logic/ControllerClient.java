@@ -36,6 +36,13 @@ public class ControllerClient {
 	private static Hosts _hosts = new Hosts();
 
 	/**
+	 * Sets the 
+	 * @param hosts
+	 */
+	public void init(Hosts hosts) {
+		_hosts = hosts;
+	}
+	/**
 	 * initializes the Controller Client host config
 	 * @param url
 	 * @return 
@@ -322,25 +329,20 @@ public class ControllerClient {
 		return executeUrls(StringUtil.getMimePropertiesParameters());
 	}
 
+	/**
+	 * Returns status per host as text
+	 * @return status per host as text
+	 */
 	public String[] getStatusAsText() {
 		return executeUrls(StringUtil.getMimeTextParameters());
 	}
 
 	/**
-	 * 
-	 * @param host
-	 * @return
+	 * Returns status per host as xml
+	 * @return status per host as xml
 	 */
 	public String[] getStatusAsXml() {
 		return executeUrls(StringUtil.getMimeXmlParameters());
-	}
-
-	/**
-	 * 
-	 * @param hosts
-	 */
-	public void setHosts(Hosts hosts) {
-		_hosts = hosts;
 	}
 
 	/**

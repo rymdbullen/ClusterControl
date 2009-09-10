@@ -39,7 +39,7 @@ public class WorkerStatusTest extends TestCase {
 		hosts.getHost().add(host);
 		
 		ControllerClient cc = new ControllerClient();
-		cc.setHosts(hosts);
+		cc.init(hosts);
 	}
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
@@ -73,8 +73,10 @@ public class WorkerStatusTest extends TestCase {
 			JkBalancerType workerList = workerLists.get(i);
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
-				System.out.println("["+index+"]: "+workerStatus.getActivation());
-				assertEquals("ACT", workerStatus.getActivation());
+				if(worker.equals(workerStatus.getName())) {
+					assertEquals("ACT", workerStatus.getActivation());
+				}
+				System.out.println("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
