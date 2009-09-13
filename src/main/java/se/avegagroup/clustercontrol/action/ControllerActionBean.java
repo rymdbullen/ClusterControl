@@ -12,8 +12,8 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import se.avegagroup.clustercontrol.data.HostType;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
@@ -26,7 +26,8 @@ import se.avegagroup.clustercontrol.util.WorkerStatus;
 @UrlBinding("/Controller.htm")
 public class ControllerActionBean extends BaseActionBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+	private static Log logger = LogFactory.getLog(ControllerActionBean.class);
+//	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
 	/**
 	 * 

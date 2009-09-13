@@ -20,6 +20,7 @@
         function functionRenderInit(hosts) {
         	if(undefined == hosts) {
 	        	dwr.util.setValue("demoReply", "not initialized");
+	        	disableControls();
 	        	return;
         	}
         	enableControls();
@@ -38,15 +39,9 @@
         	toggleControls(true);
         }
         function toggleControls(enableDisable) {
-//alert("hejsan");
         	$("btnStatusComplex").disabled = enableDisable;
         	$("btnActivate").disabled = enableDisable;
         	$("btnDisable").disabled = enableDisable;
-//        	if($("btnStatusComplex").disabled == true) {
-//            	$("btnStatusComplex").disabled = false;
-//        	} else {
-//        		$("btnStatusComplex").disabled = true;
-//        	}
         }
         function functionRenderStatus(balancers) {
         	// Delete all the rows except for the "pattern" row
@@ -74,14 +69,15 @@
 	              		//$("btnActivation" + id).disabled = true;
 	              		//$("btnDisabled" + id).disabled = false;
 	              	} else if(member.activation != "ACT" ) {
-	              		$("btnActivation" + id).disabled = false;
+	              		//$("btnActivation" + id).disabled = false;
 	              		//$("btnDisabled" + id).disabled = true;
-	              		//$("columnActivation" + id).style.backgroundColor = "red";
+	              		$("columnActivation" + id).style.backgroundColor = "red";
 	              	}
 	              	$("pattern" + id).style.display = "table-row";
 	        	}
 	        }
         	dwr.util.setValue("demoReply", "Init OK");
+        	enableControls();
         }
         function getStatusComplex() {
       	  	var name = dwr.util.getValue("demoName");

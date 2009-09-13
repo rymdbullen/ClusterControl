@@ -15,11 +15,15 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
 import junit.framework.TestCase;
 
 public class JAXBTest extends TestCase {
+	private static Log logger = LogFactory.getLog(JAXBTest.class);
+//	private static final Logger logger = LoggerFactory.getLogger(JAXBTest.class);
 	/**
 	 * 
 	 * @throws JAXBException
@@ -50,7 +54,7 @@ public class JAXBTest extends TestCase {
 
 		JAXBElement<JkStatusType> jkStatusType = (JAXBElement<JkStatusType>) unmarshaller.unmarshal(fis);
 		JkStatusType status = jkStatusType.getValue();
-		System.out.println("Balancers.getCount()="+status.getBalancers().getCount());
+		logger.debug("Balancers.getCount()="+status.getBalancers().getCount());
 	}
 	/**
 	 * 
@@ -82,7 +86,7 @@ public class JAXBTest extends TestCase {
 
 		JAXBElement<JkStatusType> jkActionStatusType = (JAXBElement<JkStatusType>) unmarshaller.unmarshal(fis);
 		JkStatusType result = jkActionStatusType.getValue();
-		System.out.println("Result: "+result.getResult().getType()+" "+result.getResult().getMessage());
+		logger.debug("Result: "+result.getResult().getType()+" "+result.getResult().getMessage());
 	}
 	/**
 	 * 

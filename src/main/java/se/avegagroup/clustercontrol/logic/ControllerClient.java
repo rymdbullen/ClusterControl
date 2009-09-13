@@ -8,16 +8,14 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import se.avegagroup.clustercontrol.action.ControllerActionBean;
 import se.avegagroup.clustercontrol.data.Hosts;
 import se.avegagroup.clustercontrol.data.HostType;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
@@ -29,7 +27,8 @@ import se.avegagroup.clustercontrol.util.WorkerStatus;
 
 public class ControllerClient {
 
-	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+	private static Log logger = LogFactory.getLog(ControllerClient.class);
+	//	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
 	private static final String RESPONSE_FORMAT_XML = "xml";
 	private static final String RESPONSE_FORMAT_PROPERTIES = "prop";
@@ -50,36 +49,52 @@ public class ControllerClient {
 	 * @return list of balancers
 	 */
 	public static ArrayList<JkBalancerType> init(URL url) {
-		if(_hosts!=null || _hosts.getHost()!=null) {
-			// previous hosts found, check if already setup
-			int hostsCount = _hosts.getHost().size();
-			for (int i = 0; i < hostsCount; i++) {
-				HostType host = _hosts.getHost().get(i);
-				if(host.getIpAddress().equals(url.getHost())) {
-					if(host.getPort() == url.getPort()) {
-						
-					}
-				}
-			}
-		}
 		HostType host = new HostType();
 		host.setIpAddress(url.getHost());
 		host.setPort(url.getPort());
 		String jkContext = StringUtil.checkPath(url.getPath());
-		host.setContext(""+jkContext);
-		_hosts.getHost().add(host);
+		host.setContext(jkContext);
+		if(ControllerClient.addHost(host)) {
+			// added host
+		} else {
+			// host already exist
+		}
 
 		return statusComplex();
 	}
 	/**
-	 * 
+	 * Checks if the provided host is exists, if not it adds it to the hosts container
+	 * @param hostToAdd the host to add
+	 */
+	private static boolean addHost(HostType hostToAdd) {
+		if(_hosts!=null) {
+			// previous hosts found, check if already setup
+			int hostsCount = _hosts.getHost().size();
+			for (int i = 0; i < hostsCount; i++) {
+				HostType host = _hosts.getHost().get(i);
+				if(host.getIpAddress().equals(hostToAdd.getIpAddress())) {
+					if(host.getPort().equals(hostToAdd.getPort())) {
+						if(host.getContext().equals(hostToAdd.getContext())) {
+							logger.info("Already exist; trying to add host, "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+							return false;
+						}
+					}
+				}
+			}
+		}
+		logger.info("Added host, "+hostToAdd.getIpAddress()+", "+hostToAdd.getPort()+", "+hostToAdd.getContext());
+		_hosts.getHost().add(hostToAdd);
+		return true;
+	}
+	/**
+	 * Initializes the client with a loadbalancer and hosts
 	 * @param loadBalancer
 	 * @param hostnames
 	 * @return
 	 */
 	public static String init(String loadBalancer, ArrayList<HostType> hostnames) {
 		for (int i = 0; i < hostnames.size(); i++) {
-			_hosts.getHost().add(hostnames.get(i));
+			ControllerClient.addHost(hostnames.get(i));
 		}
 		_hosts.setLoadBalancer(loadBalancer);
 		
@@ -103,7 +118,7 @@ public class ControllerClient {
 //host.setHostname("name");
 			host.setIpAddress(ipAddress);
 			host.setPort(port);
-			_hosts.getHost().add(host);
+			ControllerClient.addHost(host);
 		}
 		_hosts.setLoadBalancer(loadBalancer);
 		

@@ -9,10 +9,9 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import se.avegagroup.clustercontrol.action.ControllerActionBean;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkBalancersType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
@@ -28,7 +27,8 @@ import junit.framework.TestCase;
  */
 public class WorkerStatusTest extends TestCase {
 
-	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+	private static Log logger = LogFactory.getLog(WorkerStatusTest.class);
+//	private static final Logger logger = LoggerFactory.getLogger(WorkerStatusTest.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -100,8 +100,10 @@ public class WorkerStatusTest extends TestCase {
 			JkBalancerType workerList = workerLists.get(i);
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
-				logger.debug("["+index+"]: "+workerStatus.getActivation());
-				assertEquals("DIS", workerStatus.getActivation());
+				if(worker.equals(workerStatus.getName())) {
+					assertEquals("DIS", workerStatus.getActivation());
+				}
+				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}

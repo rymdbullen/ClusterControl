@@ -23,6 +23,7 @@ import se.avegagroup.clustercontrol.data.JkStatusType;
 public class WorkerStatus {
 	
 	private static final Log logger = LogFactory.getLog(WorkerStatus.class);
+	//private static final Logger logger = LoggerFactory.getLogger(WorkerStatus.class);
 	
 	/**
 	 * 
