@@ -16,7 +16,7 @@
 	<xsd:complexType name="HostType">
 		<xsd:attribute name="context" type="xsd:string" />
 		<xsd:attribute name="ipAddress" type="xsd:string" />
-		<xsd:attribute name="port" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:int" />
 	</xsd:complexType>
 
 	<xsd:element name="status" type="JkStatusType" />

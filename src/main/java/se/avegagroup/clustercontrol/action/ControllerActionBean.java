@@ -1,4 +1,4 @@
-package se.avegagroup.clustercontrol.logic;
+package se.avegagroup.clustercontrol.action;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,9 +15,11 @@ import net.sourceforge.stripes.action.UrlBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.avegagroup.clustercontrol.data.HostType;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
 import se.avegagroup.clustercontrol.data.JkStatusType;
+import se.avegagroup.clustercontrol.logic.ControllerClient;
 import se.avegagroup.clustercontrol.util.StringUtil;
 import se.avegagroup.clustercontrol.util.WorkerStatus;
 
@@ -35,6 +37,32 @@ public class ControllerActionBean extends BaseActionBean {
 		return new ForwardResolution("/WEB-INF/jsp/dwr/controller.jsp");
 	}
 	/**
+	 * Returns a text if initialized, null if not 
+	 * @param worker N/A
+	 * @return a text if initialized, null if not
+	 */
+	public static String isInitialized(String worker) {
+		if(false==ControllerClient.isInitialized()) {
+			return null;
+		}
+		String initDescriptionKey = "initialized, ";
+		int hostsCount = ControllerClient.getHostsContainer().getHost().size();
+		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
+			HostType host = ControllerClient.getHostsContainer().getHost().get(hostIdx);
+			initDescriptionKey += host.getIpAddress();
+		}
+		logger.debug(initDescriptionKey);
+		return initDescriptionKey;
+	}
+	/**
+	 * Returns true if client is initalized, false if not
+	 * @param worker
+	 * @return true if client is initalized, false if not
+	 */
+	public static Boolean isInit(String worker) {
+		return ControllerClient.isInitialized();
+	}
+	/**
 	 * 
 	 * @param loadBalancer
 	 * @param worker
@@ -44,7 +72,7 @@ public class ControllerActionBean extends BaseActionBean {
 		return ControllerClient.stop(loadBalancer, worker);
 	}
 	/**
-	 * 
+	 * Disables a worker
 	 * @param loadBalancer
 	 * @param worker
 	 * @return

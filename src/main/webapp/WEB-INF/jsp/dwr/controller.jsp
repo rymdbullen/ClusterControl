@@ -5,6 +5,7 @@
 		<script>
     	function init() {
     	  dwr.util.useLoadingMessage();
+    	  JkController.isInitialized('workerName', functionRenderInit);
     	}
         function activate() {
       	  	var loadBalancer = dwr.util.getValue("loadBalancer");
@@ -16,6 +17,37 @@
         	var workerName = dwr.util.getValue("workerName");
       		JkController.disable(loadBalancer, workerName, functionRenderStatus);
       	}
+        function functionRenderInit(hosts) {
+        	if(undefined == hosts) {
+	        	dwr.util.setValue("demoReply", "not initialized");
+	        	return;
+        	}
+        	enableControls();
+        	var host;
+        	var output = "";
+        	for (var hostsIdx = 0; hostsIdx < hosts.length; hostsIdx++) {
+  	      		host = hosts[hostsIdx];
+  	      		output = output + ", " + host.ipAddress;
+        	}
+	        dwr.util.setValue("demoReply", "Init OK"+output);
+        }
+        function enableControls() {
+        	toggleControls(false);
+        }
+        function disableControls() {
+        	toggleControls(true);
+        }
+        function toggleControls(enableDisable) {
+//alert("hejsan");
+        	$("btnStatusComplex").disabled = enableDisable;
+        	$("btnActivate").disabled = enableDisable;
+        	$("btnDisable").disabled = enableDisable;
+//        	if($("btnStatusComplex").disabled == true) {
+//            	$("btnStatusComplex").disabled = false;
+//        	} else {
+//        		$("btnStatusComplex").disabled = true;
+//        	}
+        }
         function functionRenderStatus(balancers) {
         	// Delete all the rows except for the "pattern" row
             dwr.util.removeAllRows("statusbody", { filter:function(tr) {
@@ -39,12 +71,17 @@
 	              	dwr.util.setValue("columnActivation" + id, member.activation);
 	              	if(member.activation == "ACT" ) {
 		              	$("columnActivation" + id).style.backgroundColor = "green";
+	              		//$("btnActivation" + id).disabled = true;
+	              		//$("btnDisabled" + id).disabled = false;
 	              	} else if(member.activation != "ACT" ) {
-	              		$("columnActivation" + id).style.backgroundColor = "red";
+	              		$("btnActivation" + id).disabled = false;
+	              		//$("btnDisabled" + id).disabled = true;
+	              		//$("columnActivation" + id).style.backgroundColor = "red";
 	              	}
 	              	$("pattern" + id).style.display = "table-row";
 	        	}
 	        }
+        	dwr.util.setValue("demoReply", "Init OK");
         }
         function getStatusComplex() {
       	  	var name = dwr.util.getValue("demoName");
@@ -56,18 +93,13 @@
       	}
     </script>
 		<h1>JK Status</h1>
-		<p>Hostname: <input type="text" id="hostname" size="50" /><input
-			value="Set Hostname" type="button" onclick="setHostname()" /> <br />
+		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetHostname" value="Initialize" type="button" onclick="setHostname()" /> <br />
 		<br />
-		loadbalancer, workername <input type="text" id="loadBalancer" /><input
-			type="text" id="workerName" /> <input value="Activate" type="button"
-			onclick="activate()" /> <input value="Disable" type="button"
-			onclick="disable()" /> <br />
 		<br />
-		<input value="StatusComplex" type="button"
-			onclick="getStatusComplex()" /> <br />
+		<input id="btnStatusComplex" value="StatusComplex" type="button" onclick="getStatusComplex()" disabled="disabled" /> <br />
 		Reply: <span id="demoReply"></span> <br />
-		Status: <span id="demoStatus"></span></p>
+		Status: <span id="demoStatus"></span>
+		</p>
 		<table border="1" class="rowed grey">
 			<thead>
 				<tr>
@@ -84,19 +116,20 @@
 					<td><span id="columnWorker">Worker</span></td>
 					<td><span id="columnState">State</span></td>
 					<td><span id="columnActivation">Activation</span></td>
-					<td><input id="disable" type="button" value="Disable"
-						onclick="disableClicked(this.id)" /> <input id="activate"
-						type="button" value="Activate" onclick="activateClicked(this.id)" />
+					<td><input id="btnDisable" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnActivate" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
 					</td>
 				</tr>
 			</tbody>
 		</table>
 		<p>
-		<p>
 		<h3>TODO</h3>
 		<li>
-			<ul>1. Quartz?</ul>
+			<ul>1. Quartz or javascript timer, how to push...</ul>
 			<ul>2. Visual Enhancement</ul>
+		</li>
+		<h3>BUGS</h3>
+		<li>
+			<ul>Handle different jk versions</ul>
 		</li>
 		</p>
 	</s:layout-component>

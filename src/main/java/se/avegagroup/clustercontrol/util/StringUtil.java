@@ -66,10 +66,10 @@ System.out.println(strippedHost);
 	 * @param host the complete host including possible port
 	 * @return the port
 	 */
-	public static String getPort(String host) {
+	public static int getPort(String host) {
 		String strippedPort = host.replaceAll("([\\.\\d]*:)", "");
 System.out.println(strippedPort);
-		return strippedPort;
+		return Integer.parseInt(strippedPort);
 	}
 	/**
 	 * Checks and assures that the context not ends with a slash 

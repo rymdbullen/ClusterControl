@@ -16,7 +16,7 @@ public class ConfigManager {
 		HostType host = new HostType();
 		//host.setHostname("name");
 		host.setIpAddress(hostname);
-		host.setPort("8888");
+		host.setPort(8888);
 		
 		_hosts = hosts;  
 	}

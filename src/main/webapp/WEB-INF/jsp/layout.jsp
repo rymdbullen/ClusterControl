@@ -13,7 +13,7 @@
     <script type='text/javascript' src='/clustercontrol/dwr/engine.js'></script>
     <script type='text/javascript' src='/clustercontrol/dwr/util.js'></script>
   </head>
-  <body>
+  <body onload="javascript:init()">
     <div id="main">
       <s:layout-component name="body">
       </s:layout-component>

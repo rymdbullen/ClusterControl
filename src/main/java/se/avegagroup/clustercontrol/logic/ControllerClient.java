@@ -8,14 +8,16 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import se.avegagroup.clustercontrol.action.ControllerActionBean;
 import se.avegagroup.clustercontrol.data.Hosts;
 import se.avegagroup.clustercontrol.data.HostType;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
@@ -27,7 +29,7 @@ import se.avegagroup.clustercontrol.util.WorkerStatus;
 
 public class ControllerClient {
 
-	private static final Log logger = LogFactory.getLog(ControllerClient.class);
+	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
 	private static final String RESPONSE_FORMAT_XML = "xml";
 	private static final String RESPONSE_FORMAT_PROPERTIES = "prop";
@@ -36,21 +38,33 @@ public class ControllerClient {
 	private static Hosts _hosts = new Hosts();
 
 	/**
-	 * Sets the 
-	 * @param hosts
+	 * Initializes the ControllerClient with a hosts container. 
+	 * @param hosts the hosts container
 	 */
-	public void init(Hosts hosts) {
+	public static void init(Hosts hosts) {
 		_hosts = hosts;
 	}
 	/**
-	 * initializes the Controller Client host config
-	 * @param url
-	 * @return 
+	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
+	 * @param url the initializing url
+	 * @return list of balancers
 	 */
 	public static ArrayList<JkBalancerType> init(URL url) {
+		if(_hosts!=null || _hosts.getHost()!=null) {
+			// previous hosts found, check if already setup
+			int hostsCount = _hosts.getHost().size();
+			for (int i = 0; i < hostsCount; i++) {
+				HostType host = _hosts.getHost().get(i);
+				if(host.getIpAddress().equals(url.getHost())) {
+					if(host.getPort() == url.getPort()) {
+						
+					}
+				}
+			}
+		}
 		HostType host = new HostType();
 		host.setIpAddress(url.getHost());
-		host.setPort(""+url.getPort());
+		host.setPort(url.getPort());
 		String jkContext = StringUtil.checkPath(url.getPath());
 		host.setContext(""+jkContext);
 		_hosts.getHost().add(host);
@@ -76,12 +90,15 @@ public class ControllerClient {
 
 	/**
 	 * initializes the Controller Client host config
+	 * @param loadBalancer
+	 * @param hostnames
+	 * @return
 	 */
 	public static String init(String loadBalancer, String[] hostnames) {
 		for (int i = 0; i < hostnames.length; i++) {
 			String hostname = hostnames[i];
 			String ipAddress = StringUtil.getAddress(hostname);
-			String port = StringUtil.getPort(hostname);
+			int port = StringUtil.getPort(hostname);
 			HostType host = new HostType();
 //host.setHostname("name");
 			host.setIpAddress(ipAddress);
@@ -95,9 +112,9 @@ public class ControllerClient {
 		return "OK";
 	}
 	/**
-	 * 
-	 * @param worker
-	 * @return
+	 * Executes urls
+	 * @param parameters the parameters to execute
+	 * @return the workerlists, ie html bodys
 	 */
 	public static String[] executeUrls(String parameters) {
 		Iterator<HostType> hosts = _hosts.getHost().iterator();
@@ -122,7 +139,6 @@ public class ControllerClient {
 	public static String executeUrl(HostType host, String parameters) {
 		String targetUrl = createTargetUrl(host, parameters);
 		logger.debug("executing request " + targetUrl);
-		System.out.println("executing request " + targetUrl);
 
 		// creates the response handler
 		HttpClient httpclient = new DefaultHttpClient();
@@ -141,10 +157,10 @@ public class ControllerClient {
 	}
 
 	/**
-	 * 
-	 * @param loadBalancer
-	 * @param worker
-	 * @return
+	 * Activates the worker for the supplied loadbalancer and returns the list of balancers
+	 * @param loadBalancer the loadbalancer
+	 * @param worker the worker to activate
+	 * @return list of balancers
 	 */
 	public static ArrayList<JkBalancerType> activate(String loadBalancer, String worker) {
 		//
@@ -159,19 +175,19 @@ public class ControllerClient {
 	}
 
 	/**
-	 * 
-	 * @param worker
-	 * @return
+	 * Activates the worker for the initialized loadbalancer and returns the list of balancers
+	 * @param worker the worker to activate
+	 * @return list of balancers
 	 */
 	public static ArrayList<JkBalancerType> activate(String worker) {
 		return activate(_hosts.getLoadBalancer(), worker);
 	}
 
 	/**
-	 * 
-	 * @param loadBalancer
-	 * @param worker
-	 * @return
+	 * Disables the worker for the initialized loadbalancer and returns the list of balancers
+	 * @param loadBalancer the loadbalancer
+	 * @param worker the worker to disable
+	 * @return list of balancers
 	 */
 	public static ArrayList<JkBalancerType> disable(String loadBalancer, String worker) {
 		//
@@ -184,7 +200,19 @@ public class ControllerClient {
 
 		return statusComplex();
 	}
-
+	/**
+	 * Disables the worker for the initialized loadbalancer and returns the list of balancers
+	 * @param worker the worker to disable
+	 * @return list of balancers
+	 */
+	public static ArrayList<JkBalancerType> disable(String worker) {
+		return disable(_hosts.getLoadBalancer(), worker);
+	}
+	/**
+	 * Parses the supplied workerLists and 
+	 * @param workerLists the workerlist, ie html bodys
+	 * @param worker the worker to get status for
+	 */
 	private static void parseStatusAndPause(String[] workerLists, String worker) {
 		//
 		// process the disable action responses
@@ -194,37 +222,28 @@ public class ControllerClient {
 			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList);
 			JkResultType result = jkStatus.getValue().getResult();
 			if (result.getType().equals("OK")) {
-				System.out.println("Worker: '" + worker + "' action OK!");
+				logger.debug("Worker: '" + worker + "' action OK!");
 			} else {
-				System.out.println("Worker: '" + worker + "' action NOK!");
+				logger.debug("Worker: '" + worker + "' action NOK!");
 			}
 		}
 
 		//
 		// wait for x seconds
 		try {
-			System.out.println("Hello Mac! ACTIVATE");
+			logger.info("Sleeping");
 			// Sleep for 3 seconds
 			// Thread.sleep() must be within a try - catch block
 			Thread.sleep(3000);
 		} catch (Exception e) {
-			System.out.println(e.getMessage());
+			logger.debug("Error when suspending thread: "+e.getMessage());
 		}
 	}
 	/**
-	 * 
-	 * @param worker
-	 * @return
-	 */
-	public static ArrayList<JkBalancerType> disable(String worker) {
-		return disable(_hosts.getLoadBalancer(), worker);
-	}
-
-	/**
-	 * 
-	 * @param loadBalancer
-	 * @param worker
-	 * @return
+	 * Stops the worker for the supplied loadbalancer and returns the list of balancers
+	 * @param loadBalancer the loadbalancer
+	 * @param worker the worker to stop
+	 * @return list of balancers
 	 */
 	public static List<JkBalancerType> stop(String loadBalancer, String worker) {
 		String stopParameters = StringUtil.getStopParameters(loadBalancer, worker);
@@ -237,17 +256,16 @@ public class ControllerClient {
 	}
 
 	/**
-	 * 
-	 * @param worker
-	 * @return
+	 * Stops the worker for the initialized loadbalancer and returns the list of balancers
+	 * @param worker the worker to stop
+	 * @return list of balancers
 	 */
 	public static List<JkBalancerType> stop(String worker) {
 		return stop(_hosts.getLoadBalancer(), worker);
 	}
 	/**
-	 * 
-	 * @param worker
-	 * @return
+	 * Returns the balancers
+	 * @return the balancers
 	 */
 	public static ArrayList<JkBalancerType> statusComplex() {
 		/** List of statuses like 0,0 - 1,0 */
@@ -271,9 +289,8 @@ public class ControllerClient {
 		return resultList;
 	}
 	/**
-	 * 
-	 * @param worker
-	 * @return
+	 * Returns the status as string values.
+	 * @return the status as string values
 	 */
 	public static ArrayList<String[]> status() {
 		/** List of statuses like 0,0 - 1,0 */
@@ -304,10 +321,9 @@ public class ControllerClient {
 	}
 
 	/**
-	 * 
-	 * @param host
-	 * @param format
-	 * @return
+	 * Returns the status in the supplied format
+	 * @param format the format to get status for
+	 * @return the status in the supplied format
 	 */
 	public static String[] status(String format) {
 		String targetUrl = "";
@@ -320,62 +336,73 @@ public class ControllerClient {
 		}
 		return executeUrls(targetUrl);
 	}
-
+	/**
+	 * Returns the status per host, in the properties format
+	 * @return the status per host, in the properties format
+	 */
 	public String[] getStatusAsProperties() {
 		return executeUrls(StringUtil.getMimePropertiesParameters());
 	}
-
-	public String[] getStatusAsProperties(String host) {
-		return executeUrls(StringUtil.getMimePropertiesParameters());
-	}
-
 	/**
-	 * Returns status per host as text
-	 * @return status per host as text
+	 * Returns the status per host, in the text format
+	 * @return the status per host, in the text format
 	 */
 	public String[] getStatusAsText() {
 		return executeUrls(StringUtil.getMimeTextParameters());
 	}
 
 	/**
-	 * Returns status per host as xml
-	 * @return status per host as xml
+	 * Returns the status per host, in the xml format
+	 * @return the status per host, in the xml format
 	 */
 	public String[] getStatusAsXml() {
 		return executeUrls(StringUtil.getMimeXmlParameters());
 	}
-
 	/**
-	 * 
-	 * @return
+	 * Returns the hosts container
+	 * @return the hosts container
 	 */
-	public Hosts getHosts() {
+	public static Hosts getHostsContainer() {
 		return _hosts;
 	}
 	/**
-	 * 
-	 * @param host
-	 * @return
-	 */
-//	public static String createTargetUrlReadOnly(String host) {
-//		String parametersReadOnly = "cmd=list&opt=36";
-//		return createTargetUrl(host, parametersReadOnly);
-//	}
-	/**
-	 * 
-	 * @param host
-	 * @param port
-	 * @param jkContext
-	 * @param parameters
-	 * @return
+	 * Creates the target url to execute by the http client
+	 * @param host the host with all info about the target, ie ipaddress, port, context
+	 * @param parameters the control parameters, added as url parameters 
+	 * @return the target url to execute by the http client
 	 */
 	public static String createTargetUrl(HostType host, String parameters) {
-		String port = host.getPort();
-		if (false==port.trim().equals("")) {
-			port = ":"+port;
+		Integer port = host.getPort();
+		String portPart = "";
+		String targetHost = "";
+		if (port!=null && port > 0) {
+			portPart = ":"+port;
 		}
-		String targetHost = "http://"+ host.getIpAddress() + port;
+		targetHost = "http://"+ host.getIpAddress() + portPart;
 		String targetContext = "/"+host.getContext() + "?" + parameters;
 		return targetHost + targetContext;
+	}
+	/**
+	 * Returns true if one or more hosts added to hosts container, false if not
+	 * @return true if one or more hosts added to hosts container, false if not
+	 */
+	public static Boolean isInitialized() {
+		if(_hosts!=null && _hosts.getHost().size()>0){
+			logger.info("initialized: "+_hosts.getHost().size()+" hosts");
+			return true;
+		}
+		logger.info("ControllerClient not initialized");
+		return false;
+	}
+	/**
+	 * Returns all hosts in hosts container
+	 * @return all hosts in hosts container
+	 */
+	public static List<HostType> getHosts() {
+		if(_hosts!=null && _hosts.getHost().size()>0){
+			logger.info("returning "+_hosts.getHost().size()+" hosts");
+			return _hosts.getHost();
+		} 
+		return null;
 	}
 }

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE dwr PUBLIC "-//GetAhead Limited//DTD Direct Web Remoting 3.0//EN" "http://getahead.org/dwr//dwr30.dtd">
+<!DOCTYPE dwr PUBLIC "-//GetAhead Limited//DTD Direct Web Remoting 3.0//EN" "http://getahead.org/dwr/dwr30.dtd">
 
 <dwr>
   <allow>
     <create creator="new" javascript="JkController" scope="script">
-      <param name="class" value="se.avegagroup.clustercontrol.logic.ControllerActionBean"/>
+      <param name="class" value="se.avegagroup.clustercontrol.action.ControllerActionBean"/>
     </create>
 	<convert match="se.avegagroup.clustercontrol.data.JkMemberType" converter="bean"/>
 	<convert match="se.avegagroup.clustercontrol.data.JkBalancerType" converter="bean"/>
 	<convert match="se.avegagroup.clustercontrol.data.JkMapType" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.data.Hosts" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.data.HostType" converter="bean"/>
   </allow>
 </dwr>

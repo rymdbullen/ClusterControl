@@ -9,6 +9,10 @@ import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import se.avegagroup.clustercontrol.action.ControllerActionBean;
 import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkBalancersType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
@@ -24,6 +28,8 @@ import junit.framework.TestCase;
  */
 public class WorkerStatusTest extends TestCase {
 
+	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -35,16 +41,18 @@ public class WorkerStatusTest extends TestCase {
 		hosts.setLoadBalancer(loadBalancer);
 		host.setIpAddress(hostname);
 		host.setContext("jkmanager");
-		host.setPort("8888");
+		host.setPort(8888);
 		hosts.getHost().add(host);
 		
-		ControllerClient cc = new ControllerClient();
-		cc.init(hosts);
+		ControllerClient.init(hosts);
 	}
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
 	 */
 	public void testGetStatusUnmarshall() {
+		
+		logger.debug("Running testGetStatusUnmarshall");
+		
 		String[] bodys = ControllerClient.status("xml");
 		
 		WorkerStatus workerStatus = new WorkerStatus();
@@ -59,7 +67,7 @@ public class WorkerStatusTest extends TestCase {
 			Iterator<JkMemberType> membersIter = members.iterator();
 			while (membersIter.hasNext()) {
 				JkMemberType jkMember = (JkMemberType) membersIter.next();
-				System.out.println(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
+				logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 			}
 		}
 	}
@@ -67,6 +75,7 @@ public class WorkerStatusTest extends TestCase {
 	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
 	 */
 	public void testActivateUnmarshall() {
+		logger.debug("Running testActivateUnmarshall");
 		String worker = "footprint1";
 		ArrayList<JkBalancerType> workerLists = ControllerClient.activate(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
@@ -76,7 +85,7 @@ public class WorkerStatusTest extends TestCase {
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("ACT", workerStatus.getActivation());
 				}
-				System.out.println("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
+				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
@@ -84,13 +93,14 @@ public class WorkerStatusTest extends TestCase {
 	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
 	 */
 	public void testDisableUnmarshall() {
+		logger.debug("Running testDisableUnmarshall");
 		String worker = "footprint1";
 		ArrayList<JkBalancerType> workerLists = ControllerClient.disable(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
 			JkBalancerType workerList = workerLists.get(i);
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
-				System.out.println("["+index+"]: "+workerStatus.getActivation());
+				logger.debug("["+index+"]: "+workerStatus.getActivation());
 				assertEquals("DIS", workerStatus.getActivation());
 			}
 		}
