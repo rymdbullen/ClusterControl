@@ -85,7 +85,11 @@
       	}
         function setHostname() {
       	  	var url = dwr.util.getValue("hostname");
-      	  	JkController.setUrl(url, functionRenderStatus);
+      	  	JkController.setUrl(url, {
+      	  		callback:function(balancers) { functionRenderStatus(balancers); },
+      	  		timeout:5000,
+      	  		errorHandler:function(message) { alert("Oops: " + message); }		
+      	  	});
       	}
     </script>
 		<h1>JK Status</h1>

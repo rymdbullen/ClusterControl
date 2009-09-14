@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -37,6 +38,12 @@ public class ControllerClient {
 	private static Hosts _hosts = new Hosts();
 
 	/**
+	 * Resets the ControllerClient hosts container. 
+	 */
+	public static void reset() {
+		_hosts = new Hosts();
+	}
+	/**
 	 * Initializes the ControllerClient with a hosts container. 
 	 * @param hosts the hosts container
 	 */
@@ -54,6 +61,16 @@ public class ControllerClient {
 		host.setPort(url.getPort());
 		String jkContext = StringUtil.checkPath(url.getPath());
 		host.setContext(jkContext);
+		
+		// test this url
+		String parameters = StringUtil.getMimeXmlParameters();
+		try {
+			executeUrl(host, parameters);
+		} catch (HttpResponseException e) {
+			logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+			return null;
+		}
+		
 		if(ControllerClient.addHost(host)) {
 			// added host
 		} else {
@@ -64,26 +81,27 @@ public class ControllerClient {
 	}
 	/**
 	 * Checks if the provided host is exists, if not it adds it to the hosts container
-	 * @param hostToAdd the host to add
+	 * @param newHost the host to add
 	 */
-	private static boolean addHost(HostType hostToAdd) {
-		if(_hosts!=null) {
-			// previous hosts found, check if already setup
-			int hostsCount = _hosts.getHost().size();
-			for (int i = 0; i < hostsCount; i++) {
-				HostType host = _hosts.getHost().get(i);
-				if(host.getIpAddress().equals(hostToAdd.getIpAddress())) {
-					if(host.getPort().equals(hostToAdd.getPort())) {
-						if(host.getContext().equals(hostToAdd.getContext())) {
-							logger.info("Already exist; trying to add host, "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
-							return false;
-						}
+	private static boolean addHost(HostType newHost) {
+		if(_hosts==null) {
+			reset();
+		}
+		// previous hosts found, check if already setup
+		int hostsCount = _hosts.getHost().size();
+		for (int i = 0; i < hostsCount; i++) {
+			HostType host = _hosts.getHost().get(i);
+			if(host.getIpAddress().equals(newHost.getIpAddress())) {
+				if(host.getPort().equals(newHost.getPort())) {
+					if(host.getContext().equals(newHost.getContext())) {
+						logger.info("Already exist; trying to add host, "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+						return false;
 					}
 				}
 			}
 		}
-		logger.info("Added host, "+hostToAdd.getIpAddress()+", "+hostToAdd.getPort()+", "+hostToAdd.getContext());
-		_hosts.getHost().add(hostToAdd);
+		logger.info("Added host, "+newHost.getIpAddress()+", "+newHost.getPort()+", "+newHost.getContext());
+		_hosts.getHost().add(newHost);
 		return true;
 	}
 	/**
@@ -137,7 +155,12 @@ public class ControllerClient {
 		int index = 0;
 		while (hosts.hasNext()) {
 			HostType host = (HostType) hosts.next();
-			workerLists[index] = executeUrl(host, parameters);
+			try {
+				workerLists[index] = executeUrl(host, parameters);
+			} catch (HttpResponseException e) {
+				logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+				workerLists[index] = null;
+			}
 			index++;
 		}
 		return workerLists;
@@ -151,7 +174,7 @@ public class ControllerClient {
 	 *            the parameters to execute
 	 * @return the response, ie html body
 	 */
-	public static String executeUrl(HostType host, String parameters) {
+	public static String executeUrl(HostType host, String parameters) throws HttpResponseException {
 		String targetUrl = createTargetUrl(host, parameters);
 		logger.debug("executing request " + targetUrl);
 
@@ -163,10 +186,13 @@ public class ControllerClient {
 			org.apache.http.client.ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			responseBody = (String) httpclient.execute(httpget, responseHandler);
 		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//HttpResponseException: Not Found
 		httpclient.getConnectionManager().shutdown();
 		return responseBody;
 	}

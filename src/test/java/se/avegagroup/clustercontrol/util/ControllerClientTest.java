@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.HttpResponseException;
 
 import se.avegagroup.clustercontrol.data.JkBalancerType;
 import se.avegagroup.clustercontrol.data.JkMemberType;
@@ -34,7 +35,8 @@ public class ControllerClientTest extends TestCase {
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.ControllerClient#init(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 */
-	public void testInitDouble() throws MalformedURLException {
+	public void testInitDouble() throws MalformedURLException, HttpResponseException {
+		ControllerClient.reset();
 		logger.debug("Running testInit");
 		String url = "http://localhost:8888/jkmanager";
 		URL urll = new URL(url);
@@ -49,7 +51,8 @@ public class ControllerClientTest extends TestCase {
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.ControllerClient#init(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 */
-	public void testInit() throws MalformedURLException {
+	public void testInit() throws MalformedURLException, HttpResponseException{
+		ControllerClient.reset();
 		logger.debug("Running testInit");
 		String url = "http://localhost:8888/jkmanager";
 		URL urll = new URL(url);
@@ -70,7 +73,7 @@ public class ControllerClientTest extends TestCase {
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.ControllerClient#activate(String)}.
 	 */
-	public void testActivateUnmarshall() {
+	public void testActivateUnmarshall() throws HttpResponseException {
 		logger.debug("Running testActivateUnmarshall");
 		String worker = "footprint1";
 		ArrayList<JkBalancerType> workerLists = ControllerClient.activate(worker);
@@ -79,7 +82,7 @@ public class ControllerClientTest extends TestCase {
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
-					assertEquals("ACT", workerStatus.getActivation());
+					assertEquals("DIS", workerStatus.getActivation());
 				}
 				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
@@ -88,7 +91,7 @@ public class ControllerClientTest extends TestCase {
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.ControllerClient#disable(String)}.
 	 */
-	public void testDisableUnmarshall() {
+	public void testDisableUnmarshall() throws HttpResponseException {
 		logger.debug("Running testDisableUnmarshall");
 		String worker = "footprint1";
 		ArrayList<JkBalancerType> workerLists = ControllerClient.disable(worker);
