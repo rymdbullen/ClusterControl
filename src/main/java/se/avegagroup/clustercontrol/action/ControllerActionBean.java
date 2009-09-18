@@ -15,11 +15,13 @@ import net.sourceforge.stripes.action.UrlBinding;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import se.avegagroup.clustercontrol.data.HostType;
-import se.avegagroup.clustercontrol.data.JkBalancerType;
-import se.avegagroup.clustercontrol.data.JkMemberType;
-import se.avegagroup.clustercontrol.data.JkStatusType;
-import se.avegagroup.clustercontrol.logic.ControllerClient;
+import se.avegagroup.clustercontrol.domain.HostType;
+import se.avegagroup.clustercontrol.domain.JkBalancerType;
+import se.avegagroup.clustercontrol.domain.JkMemberType;
+import se.avegagroup.clustercontrol.domain.JkStatusType;
+import se.avegagroup.clustercontrol.domain.WorkerResponse;
+import se.avegagroup.clustercontrol.domain.WorkerResponses;
+import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.util.StringUtil;
 import se.avegagroup.clustercontrol.util.WorkerStatus;
 
@@ -43,13 +45,13 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return a text if initialized, null if not
 	 */
 	public static String isInitialized(String worker) {
-		if(false==ControllerClient.isInitialized()) {
+		if(false==WorkerManager.isInitialized()) {
 			return null;
 		}
 		String initDescriptionKey = "initialized, ";
-		int hostsCount = ControllerClient.getHostsContainer().getHost().size();
+		int hostsCount = WorkerManager.getHostsContainer().getHost().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			HostType host = ControllerClient.getHostsContainer().getHost().get(hostIdx);
+			HostType host = WorkerManager.getHostsContainer().getHost().get(hostIdx);
 			initDescriptionKey += host.getIpAddress();
 		}
 		logger.debug(initDescriptionKey);
@@ -61,7 +63,7 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return true if client is initalized, false if not
 	 */
 	public static Boolean isInit(String worker) {
-		return ControllerClient.isInitialized();
+		return WorkerManager.isInitialized();
 	}
 	/**
 	 * 
@@ -70,7 +72,7 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return
 	 */
 	public static List<JkBalancerType> stop(String loadBalancer, String worker) {
-		return ControllerClient.stop(loadBalancer, worker);
+		return WorkerManager.stop(loadBalancer, worker);
 	}
 	/**
 	 * Disables a worker
@@ -79,7 +81,7 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return
 	 */
 	public static List<JkBalancerType> disable(String loadBalancer, String worker) {
-		return ControllerClient.disable(loadBalancer, worker);
+		return WorkerManager.disable(loadBalancer, worker);
 	}
 	/**
 	 * 
@@ -88,20 +90,21 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return
 	 */
 	public static List<JkBalancerType> activate(String loadBalancer, String worker) {
-		return ControllerClient.activate(loadBalancer, worker);
+		return WorkerManager.activate(loadBalancer, worker);
 	}
 	/**
 	 * returns the balancers for a host
 	 * @return
 	 */
 	public static ArrayList<JkBalancerType> getStatusComplex(String host) {
-		String[] bodys = ControllerClient.status("xml");
+		WorkerResponses workerResponses = WorkerManager.status("xml");
 		
-		ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(bodys.length);
 		WorkerStatus workerStatus = new WorkerStatus();
-		for (int hostIdx = 0; hostIdx < bodys.length; hostIdx++) {
-			String body = bodys[hostIdx];
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(body);
+		int hostsCount = workerResponses.getWorkerStatus().size();
+		ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(hostsCount);
+		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
+			WorkerResponse workerResponse = workerResponses.getWorkerStatus().get(hostIdx);
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
 			balancers.add(jkStatus.getValue().getBalancers().getBalancer());
 		}
 		return balancers;
@@ -115,7 +118,7 @@ public class ControllerActionBean extends BaseActionBean {
 		URL urll;
 		try {
 			urll = new URL(url);
-			ControllerClient.init(urll);
+			WorkerManager.init(urll);
 			return getStatusComplex("");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

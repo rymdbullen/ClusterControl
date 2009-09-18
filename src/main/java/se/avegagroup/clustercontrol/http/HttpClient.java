@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -40,8 +41,10 @@ public class HttpClient {
 
 	/**
 	 * Creates the request (GET) and receives a encapsulated response object, ie
-	 * the html body;
+	 * the html body. Returns a WorkerResponse for this request.
 	 * 
+	 * @param host
+	 * 			  the host to request
 	 * @param parameters
 	 *            the parameters to execute
 	 * @return the response, ie html body
@@ -71,7 +74,7 @@ public class HttpClient {
 			workerResponse.setWorkerError(responseError);
 		} catch (IOException e) {
 			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
-			if(e instanceof HttpHostConnectException) {
+			if(e instanceof HttpResponseException) {
 				logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
 			}
 			if(e instanceof HttpHostConnectException) {

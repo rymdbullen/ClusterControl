@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
-import se.avegagroup.clustercontrol.data.JkStatusType;
+import se.avegagroup.clustercontrol.domain.JkStatusType;
 
 public class WorkerStatus {
 	
@@ -48,7 +48,7 @@ public class WorkerStatus {
 			mySchema = null;
 		}
 		try {
-			JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.data");
+			JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
 			unmarshaller.setSchema(mySchema);
 			unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());

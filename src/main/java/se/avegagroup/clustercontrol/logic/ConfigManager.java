@@ -1,7 +1,7 @@
 package se.avegagroup.clustercontrol.logic;
 
-import se.avegagroup.clustercontrol.data.HostType;
-import se.avegagroup.clustercontrol.data.Hosts;
+import se.avegagroup.clustercontrol.domain.HostType;
+import se.avegagroup.clustercontrol.domain.Hosts;
 
 public class ConfigManager {
 

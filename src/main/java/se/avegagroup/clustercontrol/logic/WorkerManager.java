@@ -292,8 +292,8 @@ public class WorkerManager {
 			String[] memberList = new String[memberCount]; 
 			for (int memberIdx = 0; memberIdx < memberCount; memberIdx++) {
 				JkMemberType member = jkStatus.getValue().getBalancers().getBalancer().getMember().get(memberIdx);
-				System.out.println("Worker: '" + member.getName() + "' activation: "+member.getActivation()+" state: "+member.getState()+" busy: "+member.getBusy());
-				System.out.println("Result: "+result.getType());
+				logger.debug("Worker: '" + member.getName() + "' activation: "+member.getActivation()+" state: "+member.getState()+" busy: "+member.getBusy());
+				logger.debug("Result: "+result.getType());
 				//memberList.add(result.getType());
 				memberList[memberIdx] = result.getType();
 			}

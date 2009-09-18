@@ -19,6 +19,27 @@
 		<xsd:attribute name="port" type="xsd:int" />
 	</xsd:complexType>
 
+	<xsd:complexType name="WorkerResponses">
+		<xsd:sequence>
+			<xsd:element name="WorkerStatus" type="WorkerResponse" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="WorkerResponse">
+		<xsd:sequence>
+			<xsd:element name="WorkerError" type="ResponseError" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="host" type="xsd:string" />
+		<xsd:attribute name="body" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="ResponseError">
+		<xsd:attribute name="message" type="xsd:string" />
+		<xsd:attribute name="messageKey" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="severity" type="xsd:string" />
+	</xsd:complexType>
+
 	<xsd:element name="status" type="JkStatusType" />
 	
 	<xsd:complexType name="JkStatusType">
