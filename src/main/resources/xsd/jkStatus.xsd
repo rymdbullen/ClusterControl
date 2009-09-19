@@ -47,13 +47,14 @@
 			<xsd:element name="server" type="JkServerType" minOccurs="0" maxOccurs="1" />
 			<xsd:element name="software" type="JkSoftwareType" minOccurs="0" maxOccurs="1" />
 			<xsd:element name="balancers" type="JkBalancersType" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="result" type="JkResultType" minOccurs="1" maxOccurs="1" />
+			<xsd:element name="ajp_workers" type="JkAjpWorkersType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="result" type="JkResultType" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
 
 	<xsd:complexType name="JkServerType">
 		<xsd:attribute name="name" type="xsd:string" />
-		<xsd:attribute name="port" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:int" />
 	</xsd:complexType>
 
 	<xsd:complexType name="JkSoftwareType">
@@ -68,7 +69,13 @@
 		<xsd:attribute name="count" type="xsd:int" />
 	</xsd:complexType>
 
-
+	<xsd:complexType name="JkAjpWorkersType">
+		<xsd:sequence>
+			<xsd:element name="ajp" type="JkAjpType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="count" type="xsd:int" />
+	</xsd:complexType>
+	
 	<xsd:complexType name="JkBalancerType">
 		<xsd:sequence>
 			<xsd:element name="member" type="JkMemberType" maxOccurs="unbounded" />
@@ -94,11 +101,23 @@
 		<xsd:attribute name="time_to_maintenance_max" type="xsd:int" />
 	</xsd:complexType>
 
+	<xsd:complexType name="JkAjpType">
+		<xsd:sequence>
+			<xsd:element name="map" type="JkMapType" maxOccurs="unbounded" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="host" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:int" />
+		<xsd:attribute name="address" type="xsd:string" />
+		<xsd:attribute name="map_count" type="xsd:int" />
+	</xsd:complexType>
+		
 	<xsd:complexType name="JkMemberType">
 		<xsd:attribute name="name" type="xsd:string" />
 		<xsd:attribute name="type" type="xsd:string" />
 		<xsd:attribute name="host" type="xsd:string" />
-		<xsd:attribute name="port" type="xsd:string" />
+		<xsd:attribute name="port" type="xsd:int" />
 		<xsd:attribute name="address" type="xsd:string" />
 		<xsd:attribute name="activation" type="xsd:string" />
 		<xsd:attribute name="lbfactor" type="xsd:int" />

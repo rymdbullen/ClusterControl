@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import se.avegagroup.clustercontrol.domain.JkBalancerType;
 import se.avegagroup.clustercontrol.domain.JkMemberType;
@@ -20,12 +20,10 @@ import junit.framework.TestCase;
 
 /**
  * @author admin
- *
  */
 public class ControllerClientTest extends TestCase {
 
-	private static Log logger = LogFactory.getLog(ControllerClientTest.class);
-	//private static final Logger logger = LoggerFactory.getLogger(ControllerClientTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(ControllerClientTest.class);
 
 	@Override
 	protected void setUp() throws Exception {
