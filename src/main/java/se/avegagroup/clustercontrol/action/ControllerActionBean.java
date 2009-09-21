@@ -22,6 +22,7 @@ import se.avegagroup.clustercontrol.domain.JkStatusType;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
+import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
 import se.avegagroup.clustercontrol.util.StringUtil;
 import se.avegagroup.clustercontrol.util.WorkerStatus;
 
@@ -121,6 +122,9 @@ public class ControllerActionBean extends BaseActionBean {
 			WorkerManager.init(urll);
 			return getStatusComplex("");
 		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WorkerNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

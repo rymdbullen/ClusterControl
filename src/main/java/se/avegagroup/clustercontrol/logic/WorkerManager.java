@@ -49,8 +49,36 @@ public class WorkerManager {
 	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
 	 * @param url the initializing url
 	 * @return list of balancers
+	 * @throws WorkerNotFoundException if init fails
 	 */
-	public static ArrayList<JkBalancerType> init(URL url) {
+	public static WorkerResponse init(URL url) throws WorkerNotFoundException {
+		HostType host = new HostType();
+		host.setIpAddress(url.getHost());
+		host.setPort(url.getPort());
+		String jkContext = StringUtil.checkPath(url.getPath());
+		host.setContext(jkContext);
+		
+		//
+		// try to get workers for this url
+		String parameters = StringUtil.getMimeXmlParameters();
+		WorkerResponse workerResponse = HttpClient.executeUrl(host, parameters);
+		if(workerResponse.getBody()==null) {
+			throw new WorkerNotFoundException();
+		}
+		//
+		// this could not work
+		JkBalancerType balancer = statusComplex(workerResponse);
+		if(balancer!=null && balancer.getMemberCount() > 0) {			
+			addHost(host);
+		}
+		return workerResponse;
+	}
+	/**
+	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
+	 * @param url the initializing url
+	 * @return list of balancers
+	 */
+	public static ArrayList<JkBalancerType> initReturnBalancers(URL url) {
 		HostType host = new HostType();
 		host.setIpAddress(url.getHost());
 		host.setPort(url.getPort());
@@ -60,10 +88,12 @@ public class WorkerManager {
 		// test this url
 		String parameters = StringUtil.getMimeXmlParameters();
 		WorkerResponse workerResponse = HttpClient.executeUrl(host, parameters);
-		if(workerResponse==null || workerResponse.getBody()==null) {
+		if(workerResponse==null || workerResponse.getWorkerError()==null && workerResponse.getBody()==null) {
 			return null;
 		}
-		//_workerResponses.getWorkerStatus().add(workerResponse);
+		if(workerResponse.getWorkerError()!=null) {
+			
+		}
 		if(WorkerManager.addHost(host)) {
 			// added host
 		} else {
@@ -250,25 +280,48 @@ public class WorkerManager {
 	 * @return the balancers
 	 */
 	public static ArrayList<JkBalancerType> statusComplex() {
-		/** List of statuses like 0,0 - 1,0 */
-		ArrayList<JkBalancerType> resultList = new ArrayList<JkBalancerType>();
-		
 		//
 		// retrieve the statuses
 		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, StringUtil.getMimeXmlParameters());
+		return statusComplex(workerResponses);
+	}
+	/**
+	 * Returns a list of balancer for supplied worker responses
+	 * @param workerResponse the responses to convert to balancers
+	 * @return a list of balancers
+	 */
+	public static ArrayList<JkBalancerType> statusComplex(WorkerResponses workerResponses) {
 		int workerListCount = workerResponses.getWorkerStatus().size();
+		ArrayList<JkBalancerType> resultList = new ArrayList<JkBalancerType>();
 		for (int workerListIdx = 0; workerListIdx < workerListCount; workerListIdx++) {
 			WorkerResponse workerResponse = workerResponses.getWorkerStatus().get(workerListIdx);
-			WorkerStatus workerStatus = new WorkerStatus();
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
-			JkResultType result = jkStatus.getValue().getResult();
-			if(result.getType().equals("NOK")) {
-				//throw new WorkerNotFoundException();
-				return null;
+			JkBalancerType statusComplex = null;
+			try {
+				statusComplex = statusComplex(workerResponse);
+			} catch (WorkerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			resultList.add(jkStatus.getValue().getBalancers().getBalancer());
+			//
+			// store the status
+			resultList.add(statusComplex);
 		}
 		return resultList;
+	}
+	/**
+	 * Returns a balancer for supplied worker response
+	 * @param workerResponse the response to convert to a balancer
+	 * @return a balancer
+	 * @throws WorkerNotFoundException 
+	 */
+	public static JkBalancerType statusComplex(WorkerResponse workerResponse) throws WorkerNotFoundException {
+		WorkerStatus workerStatus = new WorkerStatus();
+		JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
+		JkResultType result = jkStatus.getValue().getResult();
+		if(result.getType().equals("NOK")) {
+			throw new WorkerNotFoundException();
+		}
+		return jkStatus.getValue().getBalancers().getBalancer();
 	}
 	/**
 	 * Returns the status as string values.

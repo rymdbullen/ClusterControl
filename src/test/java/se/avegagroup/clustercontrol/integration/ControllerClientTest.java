@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import se.avegagroup.clustercontrol.domain.JkBalancerType;
 import se.avegagroup.clustercontrol.domain.JkMemberType;
+import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
+import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
 import junit.framework.TestCase;
 
 /**
@@ -32,40 +34,72 @@ public class ControllerClientTest extends TestCase {
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
 	 * @throws MalformedURLException 
+	 * @throws WorkerNotFoundException 
 	 */
-	public void testInitDouble() throws MalformedURLException, HttpResponseException {
+	public void testInitDouble() throws MalformedURLException, WorkerNotFoundException {
 		WorkerManager.reset();
 		logger.debug("Running testInit");
 		String url = "http://localhost:8888/jkmanager";
 		URL urll = new URL(url);
 		
-		ArrayList<JkBalancerType> balancers = WorkerManager.init(urll);
-		assertEquals(1,balancers.size());
+		WorkerResponse response = WorkerManager.init(urll);		
+		if(response.getWorkerError()!=null) {
+			assertEquals(true, response.getBody()==null);
+			assertEquals(true, response.getWorkerError().getMessageKey()!=null);
+			assertEquals(true, response.getWorkerError().getMessageKey().equals(""));			
+		} else {			
+			assertEquals(true, response.getBody()!=null);
+			assertEquals(1,WorkerManager.getHosts().size());
+		}
 		
-		balancers = WorkerManager.init(urll);
-		assertEquals(1,balancers.size());
+		response = WorkerManager.init(urll);
+		if(response.getWorkerError()!=null) {
+			assertEquals(true, response.getBody()==null);
+			assertEquals(true, response.getWorkerError().getMessageKey()!=null);
+			assertEquals(true, response.getWorkerError().getMessageKey().equals(""));			
+		} else {			
+			assertEquals(true, response.getBody()!=null);
+			assertEquals(1,WorkerManager.getHosts().size());
+		}
 	}		
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 */
-	public void testInit() throws MalformedURLException, HttpResponseException{
+	public void testBadInit() throws MalformedURLException {
+		WorkerManager.reset();
+		logger.debug("Running testInit");
+		String url = "http://localhost:8/jkmanager";
+		URL urll = new URL(url);
+		
+		try {
+			WorkerResponse response = WorkerManager.init(urll);
+			response.getBody();
+		} catch (WorkerNotFoundException e) {
+			return;
+		}
+		fail("Expected WorkerNotFoundException");
+	}
+	/**
+	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
+	 * @throws MalformedURLException 
+	 * @throws WorkerNotFoundException 
+	 */
+	public void testInit() throws MalformedURLException, WorkerNotFoundException{
 		WorkerManager.reset();
 		logger.debug("Running testInit");
 		String url = "http://localhost:8888/jkmanager";
 		URL urll = new URL(url);
 		
-		ArrayList<JkBalancerType> balancers = WorkerManager.init(urll);		
-		
-		for (int index = 0; index < balancers.size(); index++) {
-			JkBalancerType balancer = balancers.get(index);
-			assertNotNull(balancer);
-			List<JkMemberType> members = balancer.getMember();
-			Iterator<JkMemberType> membersIter = members.iterator();
-			while (membersIter.hasNext()) {
-				JkMemberType jkMember = (JkMemberType) membersIter.next();
-				logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
-			}
+		WorkerResponse response = WorkerManager.init(urll);
+		JkBalancerType balancer = WorkerManager.statusComplex(response);
+	
+		assertNotNull(balancer);
+		List<JkMemberType> members = balancer.getMember();
+		Iterator<JkMemberType> membersIter = members.iterator();
+		while (membersIter.hasNext()) {
+			JkMemberType jkMember = (JkMemberType) membersIter.next();
+			logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 		}
 	}
 	/**
