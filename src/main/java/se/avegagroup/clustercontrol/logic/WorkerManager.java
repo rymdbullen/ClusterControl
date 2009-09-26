@@ -1,5 +1,6 @@
 package se.avegagroup.clustercontrol.logic;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +49,24 @@ public class WorkerManager {
 	/**
 	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
 	 * @param url the initializing url
+	 * @throws MalformedURLException
+	 * @throws WorkerNotFoundException
+	 */
+	public static WorkerResponse init(String url) throws MalformedURLException, WorkerNotFoundException {
+		URL workerUrl;
+		workerUrl = new URL(url);
+		return init(workerUrl);
+	}
+	/**
+	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
+	 * @param url the initializing url
 	 * @return list of balancers
-	 * @throws WorkerNotFoundException if init fails
+	 * @throws WorkerNotFoundException if init or getStatus fails
 	 */
 	public static WorkerResponse init(URL url) throws WorkerNotFoundException {
+		if(logger.isDebugEnabled()) {
+			logger.debug("Initializing url: "+url.toString());
+		}
 		HostType host = new HostType();
 		host.setIpAddress(url.getHost());
 		host.setPort(url.getPort());
@@ -63,7 +78,8 @@ public class WorkerManager {
 		String parameters = StringUtil.getMimeXmlParameters();
 		WorkerResponse workerResponse = HttpClient.executeUrl(host, parameters);
 		if(workerResponse.getBody()==null) {
-			throw new WorkerNotFoundException();
+			return null;
+			//throw new WorkerNotFoundException();
 		}
 		//
 		// this could not work
@@ -74,42 +90,18 @@ public class WorkerManager {
 		return workerResponse;
 	}
 	/**
-	 * Initializes the ControllerClient from supplied url. Sets up a hosts container and returns a list of balancers.
-	 * @param url the initializing url
-	 * @return list of balancers
-	 */
-	public static ArrayList<JkBalancerType> initReturnBalancers(URL url) {
-		HostType host = new HostType();
-		host.setIpAddress(url.getHost());
-		host.setPort(url.getPort());
-		String jkContext = StringUtil.checkPath(url.getPath());
-		host.setContext(jkContext);
-		
-		// test this url
-		String parameters = StringUtil.getMimeXmlParameters();
-		WorkerResponse workerResponse = HttpClient.executeUrl(host, parameters);
-		if(workerResponse==null || workerResponse.getWorkerError()==null && workerResponse.getBody()==null) {
-			return null;
-		}
-		if(workerResponse.getWorkerError()!=null) {
-			
-		}
-		if(WorkerManager.addHost(host)) {
-			// added host
-		} else {
-			// host already exist
-		}
-
-		return statusComplex();
-	}
-	/**
 	 * Checks if the provided host is exists, if not it adds it to the hosts container
 	 * @param newHost the host to add
+	 * @return true if host added, false if not
 	 */
 	private static boolean addHost(HostType newHost) {
 		if(_hosts==null) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("_hosts==null: resetting _hosts");
+			}
 			reset();
 		}
+		//
 		// previous hosts found, check if already setup
 		int hostsCount = _hosts.getHost().size();
 		for (int i = 0; i < hostsCount; i++) {
@@ -126,46 +118,6 @@ public class WorkerManager {
 		logger.info("Added host, "+newHost.getIpAddress()+", "+newHost.getPort()+", "+newHost.getContext());
 		_hosts.getHost().add(newHost);
 		return true;
-	}
-	/**
-	 * Initializes the client with a loadbalancer and hosts
-	 * @param loadBalancer
-	 * @param hostnames
-	 * @return
-	 */
-	public static String init(String loadBalancer, ArrayList<HostType> hostnames) {
-		for (int i = 0; i < hostnames.size(); i++) {
-			WorkerManager.addHost(hostnames.get(i));
-		}
-		_hosts.setLoadBalancer(loadBalancer);
-		
-		//ArrayList<String[]> statuses = status();
-		
-		return "OK";
-	}
-
-	/**
-	 * initializes the Controller Client host config
-	 * @param loadBalancer
-	 * @param hostnames
-	 * @return
-	 */
-	public static String init(String loadBalancer, String[] hostnames) {
-		for (int i = 0; i < hostnames.length; i++) {
-			String hostname = hostnames[i];
-			String ipAddress = StringUtil.getAddress(hostname);
-			int port = StringUtil.getPort(hostname);
-			HostType host = new HostType();
-//host.setHostname("name");
-			host.setIpAddress(ipAddress);
-			host.setPort(port);
-			WorkerManager.addHost(host);
-		}
-		_hosts.setLoadBalancer(loadBalancer);
-		
-		//ArrayList<String[]> statuses = status();
-		
-		return "OK";
 	}
 	/**
 	 * Activates the worker for the supplied loadbalancer and returns the list of balancers
@@ -233,10 +185,12 @@ public class WorkerManager {
 			WorkerStatus workerStatus = new WorkerStatus();
 			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerList.getBody());
 			JkResultType result = jkStatus.getValue().getResult();
-			if (result.getType().equals("OK")) {
-				logger.debug("Worker: '" + worker + "' action OK!");
-			} else {
-				logger.debug("Worker: '" + worker + "' action NOK!");
+			if(logger.isDebugEnabled()) {
+				if (result.getType().equals("OK")) {
+					logger.debug("Worker: '" + worker + "' action OK!");
+				} else {
+					logger.debug("Worker: '" + worker + "' action NOK!");
+				}
 			}
 		}
 
@@ -248,7 +202,9 @@ public class WorkerManager {
 			// Thread.sleep() must be within a try - catch block
 			Thread.sleep(3000);
 		} catch (Exception e) {
-			logger.debug("Error when suspending thread: "+e.getMessage());
+			if(logger.isDebugEnabled()) {
+				logger.debug("Error when suspending thread: "+e.getMessage());
+			}
 		}
 	}
 	/**
@@ -345,8 +301,10 @@ public class WorkerManager {
 			String[] memberList = new String[memberCount]; 
 			for (int memberIdx = 0; memberIdx < memberCount; memberIdx++) {
 				JkMemberType member = jkStatus.getValue().getBalancers().getBalancer().getMember().get(memberIdx);
-				logger.debug("Worker: '" + member.getName() + "' activation: "+member.getActivation()+" state: "+member.getState()+" busy: "+member.getBusy());
-				logger.debug("Result: "+result.getType());
+				if(logger.isDebugEnabled()) {
+					logger.debug("Worker: '" + member.getName() + "' activation: "+member.getActivation()+" state: "+member.getState()+" busy: "+member.getBusy());
+					logger.debug("Result: "+result.getType());
+				}
 				//memberList.add(result.getType());
 				memberList[memberIdx] = result.getType();
 			}

@@ -66,10 +66,10 @@ public class ControllerClientTest extends TestCase {
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 */
-	public void testBadInit() throws MalformedURLException {
+/*	public void testBadInit() throws MalformedURLException {
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		String url = "http://localhost:8/jkmanager";
+		String url = "http://localhost:8888/jkmanag";
 		URL urll = new URL(url);
 		
 		try {
@@ -79,7 +79,7 @@ public class ControllerClientTest extends TestCase {
 			return;
 		}
 		fail("Expected WorkerNotFoundException");
-	}
+	}*/
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
 	 * @throws MalformedURLException 

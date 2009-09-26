@@ -15,14 +15,14 @@
       <Pattern>[%d{HH:mm:ss}] %-5p %c %x - %m%n</Pattern>
     </layout>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <FileNamePattern>${user.home}/stripesquick.log.%d{'.'yyyy-MM-dd}</FileNamePattern>
+      <FileNamePattern>${user.home}/stripesquick.log.%d{yyyy-MM-dd}</FileNamePattern>
     </rollingPolicy>
   </appender>
   <logger name="org" level="WARN"/>
   <logger name="net.sourceforge.stripes" level="WARN"/>
   <logger name="com" level="WARN"/>
   <logger name="org.stripesbook.quickstart" level="INFO"/>
-  <logger name="se.avegagroup.log" level="DEBUG"/>
+  <logger name="se.avegagroup" level="DEBUG"/>
   <logger name="net" level="WARN"/>
   <logger name="org.mortbay.log" level="INFO"/>
   <root level="INFO">

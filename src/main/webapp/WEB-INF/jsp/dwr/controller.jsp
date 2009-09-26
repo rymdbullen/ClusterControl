@@ -83,7 +83,7 @@
       	  	var name = dwr.util.getValue("demoName");
       	  	JkController.getStatusComplex(name, functionRenderStatus);
       	}
-        function setHostname() {
+        function setUrl() {
       	  	var url = dwr.util.getValue("hostname");
       	  	JkController.setUrl(url, {
       	  		callback:function(balancers) { functionRenderStatus(balancers); },
@@ -93,7 +93,7 @@
       	}
     </script>
 		<h1>JK Status</h1>
-		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetHostname" value="Initialize" type="button" onclick="setHostname()" /> <br />
+		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetUrl" value="Initialize" type="button" onclick="setUrl()" /> <br />
 		<br />
 		<br />
 		<input id="btnStatusComplex" value="StatusComplex" type="button" onclick="getStatusComplex()" disabled="disabled" /> <br />
@@ -122,13 +122,19 @@
 			</tbody>
 		</table>
 		<p>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
 		<h3>TODO</h3>
 		<li>
 			<ul>1. Quartz or javascript timer, how to push...</ul>
-			<ul>2. Visual Enhancement</ul>
-		</li>
-		<h3>BUGS</h3>
-		<li>
+			<ul>2. Handle more than one host: backend and frontend, ie tables</ul>
+			<ul>3. Ask tomcat manager for contexts</ul>
+			<ul>4. Visual Enhancement</ul>
 			<ul>Handle different jk versions</ul>
 		</li>
 		</p>

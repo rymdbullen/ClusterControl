@@ -3,17 +3,19 @@ package se.avegagroup.clustercontrol.action;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import net.sourceforge.stripes.action.DefaultHandler;
 import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import se.avegagroup.clustercontrol.domain.HostType;
 import se.avegagroup.clustercontrol.domain.JkBalancerType;
@@ -23,14 +25,12 @@ import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
-import se.avegagroup.clustercontrol.util.StringUtil;
 import se.avegagroup.clustercontrol.util.WorkerStatus;
 
 @UrlBinding("/Controller.htm")
 public class ControllerActionBean extends BaseActionBean {
 
-	private static Log logger = LogFactory.getLog(ControllerActionBean.class);
-//	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
 	/**
 	 * 
@@ -55,7 +55,9 @@ public class ControllerActionBean extends BaseActionBean {
 			HostType host = WorkerManager.getHostsContainer().getHost().get(hostIdx);
 			initDescriptionKey += host.getIpAddress();
 		}
-		logger.debug(initDescriptionKey);
+		if(logger.isDebugEnabled()) {
+			logger.debug(initDescriptionKey);
+		}
 		return initDescriptionKey;
 	}
 	/**
@@ -116,11 +118,34 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @return 
 	 */
 	public static ArrayList<JkBalancerType> setUrl(String url) {
-		URL urll;
 		try {
-			urll = new URL(url);
-			WorkerManager.init(urll);
-			return getStatusComplex("");
+			URL workerUrl = new URL(url);
+			WorkerResponse workerResponse = WorkerManager.init(workerUrl);
+			//
+			// try to initialize with the supplied url
+			ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(1);
+			WorkerStatus workerStatus = new WorkerStatus();
+			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
+			JkBalancerType balancer = jkStatus.getValue().getBalancers().getBalancer();
+			balancers.add(balancer);
+			//
+			// get more hosts?
+			List<JkMemberType> members = balancer.getMember();
+			String contextPath = workerUrl.getPath();
+			HashSet<String> addressSet = getUniqueHosts(members);
+			if (addressSet!=null) {
+				if(logger.isDebugEnabled()) {
+					logger.debug("Try to get more hosts");
+				}
+				Iterator<String> addressIterator = addressSet.iterator();
+				while (addressIterator.hasNext()) {
+					String protocolAndHost = (String) addressIterator.next();
+					String address = protocolAndHost+":"+workerUrl.getPort()+contextPath;
+					URL newWorkerUrl = new URL(address);
+					WorkerManager.init(newWorkerUrl);
+				}
+			}
+			return balancers;
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -131,34 +156,28 @@ public class ControllerActionBean extends BaseActionBean {
 		return null;
 	}
 	/**
-	 * 
-	 * @param hostname
-	 * @return
+	 * Returns a list of unique host addresses, or null if no more than one host is found
+	 * @param members the members to get hosts from
+	 * @return a list of unique host addresses, or null if no more than one host is found
 	 */
-	public String setHostname(String hostname) {
-		//
-		// try to get rest of hosts...
-		List<JkBalancerType> balancers = getStatusComplex("");
-		ArrayList<String> hosts = new ArrayList<String>(1);
-		for (int balancerIdx = 0; balancerIdx < balancers.size(); balancerIdx++) {
-			JkBalancerType balancer = balancers.get(balancerIdx);
-			List<JkMemberType> members = balancer.getMember();
-			for (int memberIdx = 0; memberIdx < members.size(); memberIdx++) {
-				JkMemberType member = members.get(memberIdx);
-				String host = member.getHost();
-				host = StringUtil.getAddress(host);
-				if(false==hosts.contains(host)) {
-					hosts.add(host);
-				}
+	private static HashSet<String> getUniqueHosts(List<JkMemberType> members) {
+		HashSet<String> addressSet = new HashSet<String>(); 
+		int memberCount = members.size();
+		for (int memberIdx = 0; memberIdx < memberCount; memberIdx++) {
+			JkMemberType member = members.get(memberIdx);
+			String host = "http://"+member.getHost();
+			if(logger.isDebugEnabled()) {
+				logger.debug("found: "+host);
 			}
+			addressSet.add(host);
 		}
-		if(hosts.size()>1) {
-			System.out.println("WEE HAVEE MOREE THAN ONEE");
-		} else {
-			System.out.println("ONLY ONEE");
+		if(addressSet.size()>1) {
+			// TODO check these hosts...
+			return addressSet;
 		}
-		//String status = ControllerClient.init(hosts);
-		
-		return "status";
+		if(logger.isDebugEnabled()) {
+			logger.debug("found no more hosts");
+		}
+		return null;
 	}
 }

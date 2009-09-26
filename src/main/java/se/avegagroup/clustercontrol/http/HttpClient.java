@@ -51,8 +51,9 @@ public class HttpClient {
 	 */
 	public static WorkerResponse executeUrl(HostType host, String parameters) {
 		String targetUrl = createTargetUrl(host, parameters);
-		logger.debug("executing request " + targetUrl);
-
+		if(logger.isDebugEnabled()) {
+			logger.debug("executing request " + targetUrl);
+		}
 		// creates the response handler
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpRequestRetryHandler retryHandler = new RetryHandler();
@@ -68,15 +69,15 @@ public class HttpClient {
 			workerResponse.setHost(host.getIpAddress());
 		} catch (ClientProtocolException e) {
 			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
+			if(e instanceof HttpResponseException) {
+				logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+			}
 			ResponseError responseError = new ResponseError();
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
 			workerResponse.setWorkerError(responseError);
 		} catch (IOException e) {
 			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
-			if(e instanceof HttpResponseException) {
-				logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
-			}
 			if(e instanceof HttpHostConnectException) {
 				logger.error("Failed to connect to host: "+host.getIpAddress()+", "+host.getPort());
 			}
