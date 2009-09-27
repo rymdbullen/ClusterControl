@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 public class ControllerActionBeanTest extends TestCase {
 
 	public void testSetUrl() {
-		String url = "http://localhost:8888/jkmanager";
+		String url = "http://localhost/jkmanager";
 		ArrayList<JkBalancerType> balancerList = ControllerActionBean.setUrl(url);
 		assertEquals(1, balancerList.size());
 	}
