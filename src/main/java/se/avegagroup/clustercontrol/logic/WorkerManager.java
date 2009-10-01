@@ -128,6 +128,7 @@ public class WorkerManager {
 	public static ArrayList<JkBalancerType> activate(String loadBalancer, String worker) {
 		//
 		// Perform the activate action
+		logger.info("Activating worker: "+worker);
 		String activateParameters = StringUtil.getActivateParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, activateParameters + "&" + xmlMimeParameters);
@@ -155,6 +156,7 @@ public class WorkerManager {
 	public static ArrayList<JkBalancerType> disable(String loadBalancer, String worker) {
 		//
 		// Perform the disable action
+		logger.info("Disabling worker: "+worker);
 		String disableParameters = StringUtil.getDisableParameters(loadBalancer, worker);
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, disableParameters + "&" + xmlMimeParameters);

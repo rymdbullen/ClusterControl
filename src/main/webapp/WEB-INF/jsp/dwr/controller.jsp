@@ -7,14 +7,16 @@
     	  dwr.util.useLoadingMessage();
     	  JkController.isInitialized('workerName', functionRenderInit);
     	}
-        function activate() {
-      	  	var loadBalancer = dwr.util.getValue("loadBalancer");
-      	  	var workerName = dwr.util.getValue("workerName");
+        function activate(workerName) {
+      	  	//var loadBalancer = dwr.util.getValue("loadBalancer");
+      	  	//var workerName = dwr.util.getValue("workerName");
+      	  	var loadBalancer = "lbfootprint";
       	  	JkController.activate(loadBalancer, workerName, functionRenderStatus);
       	}
-        function disable() {
-        	var loadBalancer = dwr.util.getValue("loadBalancer");
-        	var workerName = dwr.util.getValue("workerName");
+        function disable(workerName) {
+      	  	//var loadBalancer = dwr.util.getValue("loadBalancer");
+      	  	//var workerName = dwr.util.getValue("workerName");
+      	  	var loadBalancer = "lbfootprint";
       		JkController.disable(loadBalancer, workerName, functionRenderStatus);
       	}
         function functionRenderInit(hosts) {
@@ -24,13 +26,6 @@
 	        	return;
         	}
         	enableControls();
-//        	var host;
-//        	var output = "";
-//       	alert(hosts);
-//        	for (var hostsIdx = 0; hostsIdx < hosts.length; hostsIdx++) {
-//  	      		host = hosts[hostsIdx];
-//  	      		output = output + ", " + host.ipAddress;
-//        	}
 	        dwr.util.setValue("demoReply", ""+hosts);
         }
         function enableControls() {
@@ -41,8 +36,8 @@
         }
         function toggleControls(enableDisable) {
         	$("btnStatusComplex").disabled = enableDisable;
-        	$("btnActivate").disabled = enableDisable;
-        	$("btnDisable").disabled = enableDisable;
+        	$("btnAct").disabled = enableDisable;
+        	$("btnDis").disabled = enableDisable;
         }
         function functionRenderStatus(balancers) {
         	// Delete all the rows except for the "pattern" row
@@ -66,16 +61,12 @@
 	              	dwr.util.setValue("columnActivation" + id, member.activation);
 	              	if(member.activation == "ACT" ) {
 		              	$("columnActivation" + id).style.backgroundColor = "green";
-	              		//alert(id+ " " +$("btnDisablefootprint1").disabled);
-	              		//alert(id+ " btnDisable" +$("btnDisable"+id).disabled);
-	              		//alert(id+ " btnDisable" +$("btnDisable"+id).disabled);
-		              	
-	              		$("btnActivate" + id).disabled = true;
-	              		$("btnDisable" + id).disabled = false;
+	              		$("btnAct" + id).disabled = true;
+	              		$("btnDis" + id).disabled = false;
 	              	} else if(member.activation != "ACT" ) {
 	              		$("columnActivation" + id).style.backgroundColor = "red";
-	              		$("btnActivate" + id).disabled = false;
-	              		$("btnDisable" + id).disabled = true;
+	              		$("btnAct" + id).disabled = false;
+	              		$("btnDis" + id).disabled = true;
 	              	}
 	              	$("pattern" + id).style.display = "table-row";
 	        	}
@@ -95,6 +86,16 @@
       	  		errorHandler:function(message) { alert("Oops: " + message); }		
       	  	});
       	}
+        function disableClicked(eleid) {
+        	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
+        	  var person = eleid.substring(6);
+        	  disable(person);
+        }
+        function activateClicked(eleid) {
+        	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
+        	  var person = eleid.substring(6);
+        	  activate(person);
+        }
     --></script>
 		<h1>JK Status</h1>
 		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetUrl" value="Initialize" type="button" onclick="setUrl()" /> <br />
@@ -120,7 +121,7 @@
 					<td><span id="columnWorker">Worker</span></td>
 					<td><span id="columnState">State</span></td>
 					<td><span id="columnActivation">Activation</span></td>
-					<td><input id="btnDisable" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnActivate" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
+					<td><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
 					</td>
 				</tr>
 			</tbody>
