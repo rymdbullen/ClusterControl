@@ -2,7 +2,7 @@
 
 <s:layout-render name="/WEB-INF/jsp/layout.jsp" title="ClusterControl">
 	<s:layout-component name="body">
-		<script>
+		<script><!--
     	function init() {
     	  dwr.util.useLoadingMessage();
     	  JkController.isInitialized('workerName', functionRenderInit);
@@ -24,13 +24,14 @@
 	        	return;
         	}
         	enableControls();
-        	var host;
-        	var output = "";
-        	for (var hostsIdx = 0; hostsIdx < hosts.length; hostsIdx++) {
-  	      		host = hosts[hostsIdx];
-  	      		output = output + ", " + host.ipAddress;
-        	}
-	        dwr.util.setValue("demoReply", "Init OK"+output);
+//        	var host;
+//        	var output = "";
+//       	alert(hosts);
+//        	for (var hostsIdx = 0; hostsIdx < hosts.length; hostsIdx++) {
+//  	      		host = hosts[hostsIdx];
+//  	      		output = output + ", " + host.ipAddress;
+//        	}
+	        dwr.util.setValue("demoReply", ""+hosts);
         }
         function enableControls() {
         	toggleControls(false);
@@ -54,7 +55,6 @@
         	for (var balancerIdx = 0; balancerIdx < balancers.length; balancerIdx++) {
         		balancer = balancers[balancerIdx];
         		members = balancer.member;
-	            //dwr.util.cloneNode("pattern", { idSuffix:id });
         		
 	        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
 	            	member = members[memberIdx];
@@ -66,12 +66,16 @@
 	              	dwr.util.setValue("columnActivation" + id, member.activation);
 	              	if(member.activation == "ACT" ) {
 		              	$("columnActivation" + id).style.backgroundColor = "green";
-	              		//$("btnActivation" + id).disabled = true;
-	              		//$("btnDisabled" + id).disabled = false;
+	              		//alert(id+ " " +$("btnDisablefootprint1").disabled);
+	              		//alert(id+ " btnDisable" +$("btnDisable"+id).disabled);
+	              		//alert(id+ " btnDisable" +$("btnDisable"+id).disabled);
+		              	
+	              		$("btnActivate" + id).disabled = true;
+	              		$("btnDisable" + id).disabled = false;
 	              	} else if(member.activation != "ACT" ) {
-	              		//$("btnActivation" + id).disabled = false;
-	              		//$("btnDisabled" + id).disabled = true;
 	              		$("columnActivation" + id).style.backgroundColor = "red";
+	              		$("btnActivate" + id).disabled = false;
+	              		$("btnDisable" + id).disabled = true;
 	              	}
 	              	$("pattern" + id).style.display = "table-row";
 	        	}
@@ -91,7 +95,7 @@
       	  		errorHandler:function(message) { alert("Oops: " + message); }		
       	  	});
       	}
-    </script>
+    --></script>
 		<h1>JK Status</h1>
 		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetUrl" value="Initialize" type="button" onclick="setUrl()" /> <br />
 		<br />
@@ -135,6 +139,7 @@
 			<ul>2. Handle more than one host: backend and frontend, ie tables</ul>
 			<ul>3. Ask tomcat manager for contexts</ul>
 			<ul>4. Visual Enhancement</ul>
+			<ul>Show current sessions, etc etc</ul>
 			<ul>Handle different jk versions</ul>
 		</li>
 		</p>
