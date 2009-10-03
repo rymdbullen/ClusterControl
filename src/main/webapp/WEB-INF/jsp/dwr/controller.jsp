@@ -98,12 +98,11 @@
         }
     --></script>
 		<h1>JK Status</h1>
-		<p>Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetUrl" value="Initialize" type="button" onclick="setUrl()" /> <br />
-		<br />
-		<br />
-		<input id="btnStatusComplex" value="StatusComplex" type="button" onclick="getStatusComplex()" disabled="disabled" /> <br />
-		Reply: <span id="demoReply"></span> <br />
-		Status: <span id="demoStatus"></span>
+		<p>
+			Hostname: <input type="text" id="hostname" size="50" /><input id="btnSetUrl" value="Initialize" type="button" onclick="setUrl()" /> <br />
+			<br />
+			<br />
+			Status: <span id="demoReply"></span>&#160;&#160;&#160;<input id="btnStatusComplex" value="Get Status" type="button" onclick="getStatusComplex()" disabled="disabled" /> <br />
 		</p>
 		<table border="1" class="rowed grey">
 			<thead>

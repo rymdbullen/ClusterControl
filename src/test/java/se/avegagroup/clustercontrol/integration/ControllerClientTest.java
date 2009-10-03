@@ -13,6 +13,7 @@ import org.apache.http.client.HttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.avegagroup.clustercontrol.configuration.Constants;
 import se.avegagroup.clustercontrol.domain.JkBalancerType;
 import se.avegagroup.clustercontrol.domain.JkMemberType;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
@@ -39,8 +40,7 @@ public class ControllerClientTest extends TestCase {
 	public void testInitDouble() throws MalformedURLException, WorkerNotFoundException {
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		String url = "http://localhost:8888/jkmanager";
-		URL urll = new URL(url);
+		URL urll = new URL(Constants.TEST_URL);
 		
 		WorkerResponse response = WorkerManager.init(urll);		
 		if(response.getWorkerError()!=null) {
@@ -69,8 +69,7 @@ public class ControllerClientTest extends TestCase {
 /*	public void testBadInit() throws MalformedURLException {
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		String url = "http://localhost:8888/jkmanag";
-		URL urll = new URL(url);
+		URL urll = new URL(Constants.TEST_URL);
 		
 		try {
 			WorkerResponse response = WorkerManager.init(urll);
@@ -88,8 +87,7 @@ public class ControllerClientTest extends TestCase {
 	public void testInit() throws MalformedURLException, WorkerNotFoundException{
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		String url = "http://localhost:8888/jkmanager";
-		URL urll = new URL(url);
+		URL urll = new URL(Constants.TEST_URL);
 		
 		WorkerResponse response = WorkerManager.init(urll);
 		JkBalancerType balancer = WorkerManager.statusComplex(response);

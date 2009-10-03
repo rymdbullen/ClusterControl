@@ -36,14 +36,13 @@ public class WorkerStatusTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loadBalancer = "lbfootprint";
-		String hostname = "localhost";
+		String hostname = "192.168.56.115";
 		
 		Hosts hosts = new Hosts();
 		HostType host = new HostType();
 		hosts.setLoadBalancer(loadBalancer);
 		host.setIpAddress(hostname);
 		host.setContext("jkmanager");
-		host.setPort(8888);
 		hosts.getHost().add(host);
 		
 		WorkerManager.init(hosts);
@@ -65,7 +64,7 @@ public class WorkerStatusTest extends TestCase {
 			assertNotNull(jkStatus);
 			assertEquals(new Integer(1), jkStatus.getValue().getBalancers().getCount());
 			JkBalancersType balancers =  jkStatus.getValue().getBalancers();
-			assertEquals(new Integer(2), balancers.getBalancer().getMemberCount());
+			assertEquals(new Integer(4), balancers.getBalancer().getMemberCount());
 			List<JkMemberType> members = balancers.getBalancer().getMember();
 			Iterator<JkMemberType> membersIter = members.iterator();
 			while (membersIter.hasNext()) {
