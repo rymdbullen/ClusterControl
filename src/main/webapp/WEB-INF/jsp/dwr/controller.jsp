@@ -2,7 +2,21 @@
 
 <s:layout-render name="/WEB-INF/jsp/layout.jsp" title="ClusterControl">
 	<s:layout-component name="body">
-		<script><!--
+		<script type="text/javascript"> <!--
+			function convertToGetAndRelocate(actionValue) {
+				document.jkaggregator.autorefresh.value = actionValue;
+				var interval = document.jkaggregator.refreshinterval.value;
+				var autorefresh = actionValue;
+				var url = window.location+'?';
+				if(url.indexOf('autorefresh')!=-1) {
+					url = window.location.protocol + '//' +window.location.host + window.location.pathname +'?';
+				}
+				url = url + 'autorefresh=' + autorefresh + '&';
+				url = url + 'refreshinterval=' + interval;
+				window.location.replace(url);
+			}
+		--></script>
+		<script type="text/javascript"><!--
     	function init() {
     	  dwr.util.useLoadingMessage();
     	  JkController.isInitialized('workerName', functionRenderInit);
@@ -103,6 +117,44 @@
 			<br />
 			<br />
 			Status: <span id="demoReply"></span>&#160;&#160;&#160;<input id="btnStatusComplex" value="Get Status" type="button" onclick="getStatusComplex()" disabled="disabled" /> <br />
+			<span class="header">Refresh</span>
+			On&nbsp;<input type="radio" name="autorefresh" value="on"  onclick="javascript:convertToGetAndRelocate(this.value);" />
+			Off&nbsp;<input type="radio" name="autorefresh" value="off"  onclick="javascript:convertToGetAndRelocate(this.value);" />
+			Interval&nbsp;<input type="text" name="refreshinterval" value="30" size="3" maxlength="3" />
+		</p>
+		<p>
+					<div class="workers">
+						<span class="jkcontrollerheader">2. Intervals</span><br/>
+						<br/><div class="jkcontrollersubheader">Enable Intervals</div>
+
+								
+						<input type="text" name="enableRateSlow0" value="10" size="2" maxlength="2" class="enableRate" disabled="true" />
+						<input type="text" name="enableRateSlow1" value="90" size="2" maxlength="2" class="enableRate" disabled="true" />
+						<input type="text" name="enableRateSlow2" value="60" size="2" maxlength="2" class="enableRate" disabled="true" />
+						<input type="text" name="enableRateSlow3" value="60" size="2" maxlength="2" class="enableRate" disabled="true" />
+								 : <input type="radio" name="enablerate" value="slow" onclick="javascript:setEnableRate('enable', this.value);" />
+								<br/>
+						<input type="text" name="enableRateFast0" value="10" size="2" maxlength="2" class="enableRate" disabled="true" />
+						<input type="text" name="enableRateFast1" value="25" size="2" maxlength="2" class="enableRate" disabled="true" />
+
+						<input type="text" name="enableRateFast2" value="20" size="2" maxlength="2" class="enableRate" disabled="true" />
+						<input type="text" name="enableRateFast3" value="20" size="2" maxlength="2" class="enableRate" disabled="true" />
+								 : <input type="radio" name="enablerate" value="fast" onclick="javascript:setEnableRate('enable', this.value);" />
+								<br/>
+						<input type="text" name="enableRateCustom0" value="10" size="2" maxlength="2" class="enableRate" />
+						<input type="text" name="enableRateCustom1" value="25" size="2" maxlength="2" class="enableRate" />
+						<input type="text" name="enableRateCustom2" value="20" size="2" maxlength="2" class="enableRate" />
+						<input type="text" name="enableRateCustom3" value="20" size="2" maxlength="2" class="enableRate" />
+
+								 : <input type="radio" name="enablerate" value="custom" onclick="javascript:setEnableRate('enable', this.value);" />
+						<div class="jkcontrollersubheader">Disable interval</div>
+						<input type="text" name="disableInterval0" value="3" size="2" maxlength="2" disabled="true" />
+						<input type="text" name="disableInterval1" value="3" size="2" maxlength="2" disabled="true" />
+						<input type="text" name="disableInterval2" value="3" size="2" maxlength="2" disabled="true" />
+						<input type="text" name="disableInterval3" value="3" size="2" maxlength="2" disabled="true" />
+								 : <input type="radio" name="enablerate" value="disable" onclick="javascript:setEnableRate('disable', '');" />
+
+					</div> <!-- /workers -->
 		</p>
 		<table border="1" class="rowed grey">
 			<thead>
