@@ -36,7 +36,7 @@ public class WorkerStatusTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String loadBalancer = "lbfootprint";
-		String hostname = "192.168.56.115";
+		String hostname = "192.168.10.115";
 		
 		Hosts hosts = new Hosts();
 		HostType host = new HostType();

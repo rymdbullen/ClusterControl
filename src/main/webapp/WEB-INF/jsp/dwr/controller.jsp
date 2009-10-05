@@ -2,6 +2,11 @@
 
 <s:layout-render name="/WEB-INF/jsp/layout.jsp" title="ClusterControl">
 	<s:layout-component name="body">
+		<!-- Combo-handled YUI CSS files: -->
+		<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.8.0r4/build/container/assets/skins/sam/container.css">
+		<!-- Combo-handled YUI JS files: -->
+		<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js&2.8.0r4/build/animation/animation-min.js&2.8.0r4/build/container/container-min.js"></script>
+		
 		<script type="text/javascript"> <!--
 			function convertToGetAndRelocate(actionValue) {
 				document.jkaggregator.autorefresh.value = actionValue;
