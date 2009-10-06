@@ -24,9 +24,9 @@ import junit.framework.TestCase;
 /**
  * @author admin
  */
-public class ControllerClientTest extends TestCase {
+public class WorkerManagerTest extends TestCase {
 
-	private static final Logger logger = LoggerFactory.getLogger(ControllerClientTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(WorkerManagerTest.class);
 
 	@Override
 	protected void setUp() throws Exception {
@@ -112,7 +112,7 @@ public class ControllerClientTest extends TestCase {
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
-					assertEquals("DIS", workerStatus.getActivation());
+					assertEquals("ACT", workerStatus.getActivation());
 				}
 				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
