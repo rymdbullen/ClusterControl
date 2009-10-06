@@ -112,7 +112,7 @@ public class WorkerManagerTest extends TestCase {
 			for (int index = 0; index < workerList.getMemberCount(); index++) {
 				JkMemberType workerStatus = workerList.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
-					assertEquals("ACT", workerStatus.getActivation());
+					assertEquals("DIS", workerStatus.getActivation());
 				}
 				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
