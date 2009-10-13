@@ -1,13 +1,8 @@
 package se.avegagroup.clustercontrol.action;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.bind.JAXBElement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +12,11 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
-import se.avegagroup.clustercontrol.domain.HostType;
-import se.avegagroup.clustercontrol.domain.JkBalancerType;
-import se.avegagroup.clustercontrol.domain.JkMemberType;
-import se.avegagroup.clustercontrol.domain.JkStatusType;
-import se.avegagroup.clustercontrol.domain.WorkerResponse;
-import se.avegagroup.clustercontrol.domain.WorkerResponses;
+import se.avegagroup.clustercontrol.domain.Host;
+import se.avegagroup.clustercontrol.domain.JkBalancer;
+import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
-import se.avegagroup.clustercontrol.util.WorkerStatus;
 
 @UrlBinding("/Controller.htm")
 public class ControllerActionBean extends BaseActionBean {
@@ -38,7 +29,7 @@ public class ControllerActionBean extends BaseActionBean {
 	 */
 	@DefaultHandler
 	public Resolution view() {
-		return new ForwardResolution("/WEB-INF/jsp/dwr/controller.jsp");
+		return new ForwardResolution("/WEB-INF/jsp/controller.jsp");
 	}
 	/**
 	 * Returns a text if initialized, null if not 
@@ -49,16 +40,18 @@ public class ControllerActionBean extends BaseActionBean {
 		if(false==WorkerManager.isInitialized()) {
 			return null;
 		}
-		String initDescriptionKey = "initialized, ";
-		int hostsCount = WorkerManager.getHostsContainer().getHost().size();
+		ArrayList<String> hostList = new ArrayList<String>();
+		StringBuilder message = new StringBuilder("Initialized");
+		int hostsCount = WorkerManager.getHostsContainer().getHostList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			HostType host = WorkerManager.getHostsContainer().getHost().get(hostIdx);
-			initDescriptionKey += host.getIpAddress();
+			Host host = WorkerManager.getHostsContainer().getHostList().get(hostIdx);
+			hostList.add(host.getIpAddress());
+			message.append(", "+host.getIpAddress());
 		}
 		if(logger.isDebugEnabled()) {
-			logger.debug(initDescriptionKey);
+			logger.debug(message.toString());
 		}
-		return initDescriptionKey;
+		return message.toString();
 	}
 	/**
 	 * Returns true if client is initalized, false if not
@@ -69,12 +62,12 @@ public class ControllerActionBean extends BaseActionBean {
 		return WorkerManager.isInitialized();
 	}
 	/**
-	 * 
+	 * Stops a worker and returns the status of the command
 	 * @param loadBalancer
 	 * @param worker
-	 * @return
+	 * @return the status of the command
 	 */
-	public static List<JkBalancerType> stop(String loadBalancer, String worker) {
+	public static ArrayList<JkStatus> stop(String loadBalancer, String worker) {
 		return WorkerManager.stop(loadBalancer, worker);
 	}
 	/**
@@ -83,100 +76,41 @@ public class ControllerActionBean extends BaseActionBean {
 	 * @param worker
 	 * @return
 	 */
-	public static List<JkBalancerType> disable(String loadBalancer, String worker) {
+	public static ArrayList<JkStatus> disable(String loadBalancer, String worker) {
 		return WorkerManager.disable(loadBalancer, worker);
 	}
+//	public static List<JkBalancer> disable(String loadBalancer, String worker) {
+//		return WorkerManager.disable(loadBalancer, worker);
+//	}
 	/**
 	 * 
 	 * @param loadBalancer
 	 * @param worker
 	 * @return
 	 */
-	public static List<JkBalancerType> activate(String loadBalancer, String worker) {
+	public static ArrayList<JkStatus> activate(String loadBalancer, String worker) {
 		return WorkerManager.activate(loadBalancer, worker);
 	}
 	/**
 	 * returns the balancers for a host
 	 * @return
 	 */
-	public static ArrayList<JkBalancerType> getStatusComplex(String host) {
-		WorkerResponses workerResponses = WorkerManager.status("xml");
-		
-		WorkerStatus workerStatus = new WorkerStatus();
-		int hostsCount = workerResponses.getWorkerStatus().size();
-		ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(hostsCount);
-		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			WorkerResponse workerResponse = workerResponses.getWorkerStatus().get(hostIdx);
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
-			balancers.add(jkStatus.getValue().getBalancers().getBalancer());
-		}
-		return balancers;
+	public static ArrayList<JkStatus> getStatusComplex(String host) {
+		return WorkerManager.statusComplex();
 	}
 	/**
 	 * Initializes the application and returns 
 	 * @param url the initialization url
 	 * @return 
+	 * @throws MalformedURLException 
 	 */
-	public static ArrayList<JkBalancerType> setUrl(String url) {
-		try {
-			URL workerUrl = new URL(url);
-			WorkerResponse workerResponse = WorkerManager.init(workerUrl);
-			//
-			// try to initialize with the supplied url
-			ArrayList<JkBalancerType> balancers = new ArrayList<JkBalancerType>(1);
-			WorkerStatus workerStatus = new WorkerStatus();
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
-			JkBalancerType balancer = jkStatus.getValue().getBalancers().getBalancer();
-			balancers.add(balancer);
-			//
-			// get more hosts?
-			List<JkMemberType> members = balancer.getMember();
-			String contextPath = workerUrl.getPath();
-			HashSet<String> addressSet = getUniqueHosts(members);
-			if (addressSet!=null) {
-				if(logger.isDebugEnabled()) {
-					logger.debug("Try to get more hosts");
-				}
-				Iterator<String> addressIterator = addressSet.iterator();
-				while (addressIterator.hasNext()) {
-					String protocolAndHost = (String) addressIterator.next();
-					String address = protocolAndHost+":"+workerUrl.getPort()+contextPath;
-					URL newWorkerUrl = new URL(address);
-					WorkerManager.init(newWorkerUrl);
-				}
+	public static ArrayList<JkStatus> initWithUrl(String url) throws MalformedURLException {
+		if(false==WorkerManager.isInitialized()) {
+			try {
+				return WorkerManager.init(url);
+			} catch (WorkerNotFoundException e) {
+				logger.debug("Failed to locate worker for url: "+url);
 			}
-			return balancers;
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (WorkerNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	/**
-	 * Returns a list of unique host addresses, or null if no more than one host is found
-	 * @param members the members to get hosts from
-	 * @return a list of unique host addresses, or null if no more than one host is found
-	 */
-	private static HashSet<String> getUniqueHosts(List<JkMemberType> members) {
-		HashSet<String> addressSet = new HashSet<String>(); 
-		int memberCount = members.size();
-		for (int memberIdx = 0; memberIdx < memberCount; memberIdx++) {
-			JkMemberType member = members.get(memberIdx);
-			String host = "http://"+member.getHost();
-			if(logger.isDebugEnabled()) {
-				logger.debug("found: "+host);
-			}
-			addressSet.add(host);
-		}
-		if(addressSet.size()>1) {
-			// TODO check these hosts...
-			return addressSet;
-		}
-		if(logger.isDebugEnabled()) {
-			logger.debug("found no more hosts");
 		}
 		return null;
 	}

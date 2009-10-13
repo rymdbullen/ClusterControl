@@ -7,17 +7,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.JAXBElement;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.avegagroup.clustercontrol.domain.JkBalancerType;
-import se.avegagroup.clustercontrol.domain.JkBalancersType;
-import se.avegagroup.clustercontrol.domain.JkMemberType;
-import se.avegagroup.clustercontrol.domain.JkStatusType;
-import se.avegagroup.clustercontrol.domain.Hosts;
-import se.avegagroup.clustercontrol.domain.HostType;
+import se.avegagroup.clustercontrol.configuration.Constants;
+import se.avegagroup.clustercontrol.domain.JkBalancer;
+import se.avegagroup.clustercontrol.domain.JkBalancers;
+import se.avegagroup.clustercontrol.domain.JkMember;
+import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
@@ -35,17 +32,8 @@ public class WorkerStatusTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		String loadBalancer = "lbfootprint";
-		String hostname = "192.168.10.115";
-		
-		Hosts hosts = new Hosts();
-		HostType host = new HostType();
-		hosts.setLoadBalancer(loadBalancer);
-		host.setIpAddress(hostname);
-		host.setContext("jkmanager");
-		hosts.getHost().add(host);
-		
-		WorkerManager.init(hosts);
+		logger.debug("Running tests against: "+Constants.TEST_URL);
+		WorkerManager.init(Constants.TEST_URL);
 	}
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
@@ -54,21 +42,21 @@ public class WorkerStatusTest extends TestCase {
 		
 		logger.debug("Running testGetStatusUnmarshall");
 		
-		WorkerResponses workerResponses = WorkerManager.status("xml");
+		WorkerResponses workerResponses = WorkerManager.getStatus("xml");
 		
 		WorkerStatus workerStatus = new WorkerStatus();
-		int hostsCount = workerResponses.getWorkerStatus().size();
+		int hostsCount = workerResponses.getResponseList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			WorkerResponse workerResponse = workerResponses.getWorkerStatus().get(hostIdx);
-			JAXBElement<JkStatusType> jkStatus = workerStatus.unmarshall(workerResponse.getBody());
+			WorkerResponse workerResponse = workerResponses.getResponseList().get(hostIdx);
+			JkStatus jkStatus = workerStatus.unmarshall(workerResponse.getBody());
 			assertNotNull(jkStatus);
-			assertEquals(new Integer(1), jkStatus.getValue().getBalancers().getCount());
-			JkBalancersType balancers =  jkStatus.getValue().getBalancers();
+			assertEquals(new Integer(1), jkStatus.getBalancers().getCount());
+			JkBalancers balancers =  jkStatus.getBalancers();
 			assertEquals(new Integer(4), balancers.getBalancer().getMemberCount());
-			List<JkMemberType> members = balancers.getBalancer().getMember();
-			Iterator<JkMemberType> membersIter = members.iterator();
+			List<JkMember> members = balancers.getBalancer().getMember();
+			Iterator<JkMember> membersIter = members.iterator();
 			while (membersIter.hasNext()) {
-				JkMemberType jkMember = (JkMemberType) membersIter.next();
+				JkMember jkMember = (JkMember) membersIter.next();
 				logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 			}
 		}
@@ -79,11 +67,12 @@ public class WorkerStatusTest extends TestCase {
 	public void testActivateUnmarshall() {
 		logger.debug("Running testActivateUnmarshall");
 		String worker = "footprint1";
-		ArrayList<JkBalancerType> workerLists = WorkerManager.activate(worker);
+		ArrayList<JkStatus> workerLists = WorkerManager.activate(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
-			JkBalancerType workerList = workerLists.get(i);
-			for (int index = 0; index < workerList.getMemberCount(); index++) {
-				JkMemberType workerStatus = workerList.getMember().get(index);
+			JkStatus workerList = workerLists.get(i);
+			JkBalancer balancer = workerList.getBalancers().getBalancer();
+			for (int index = 0; index < balancer.getMemberCount(); index++) {
+				JkMember workerStatus = balancer.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("ACT", workerStatus.getActivation());
 				}
@@ -97,11 +86,12 @@ public class WorkerStatusTest extends TestCase {
 	public void testDisableUnmarshall() {
 		logger.debug("Running testDisableUnmarshall");
 		String worker = "footprint1";
-		ArrayList<JkBalancerType> workerLists = WorkerManager.disable(worker);
+		ArrayList<JkStatus> workerLists = WorkerManager.disable(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
-			JkBalancerType workerList = workerLists.get(i);
-			for (int index = 0; index < workerList.getMemberCount(); index++) {
-				JkMemberType workerStatus = workerList.getMember().get(index);
+			JkStatus workerList = workerLists.get(i);
+			JkBalancer balancer = workerList.getBalancers().getBalancer();
+			for (int index = 0; index < balancer.getMemberCount(); index++) {
+				JkMember workerStatus = balancer.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("DIS", workerStatus.getActivation());
 				}

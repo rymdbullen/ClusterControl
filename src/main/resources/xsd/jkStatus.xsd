@@ -8,12 +8,13 @@
 
 	<xsd:complexType name="Hosts">
 		<xsd:sequence>
-			<xsd:element name="Host" type="HostType" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="HostList" type="Host" minOccurs="0" maxOccurs="unbounded" />
 		</xsd:sequence>
 		<xsd:attribute name="loadBalancer" type="xsd:string" />
 	</xsd:complexType>
 	
-	<xsd:complexType name="HostType">
+	<xsd:complexType name="Host">
+		<xsd:attribute name="protocol" type="xsd:string" />
 		<xsd:attribute name="context" type="xsd:string" />
 		<xsd:attribute name="ipAddress" type="xsd:string" />
 		<xsd:attribute name="port" type="xsd:int" />
@@ -21,13 +22,13 @@
 
 	<xsd:complexType name="WorkerResponses">
 		<xsd:sequence>
-			<xsd:element name="WorkerStatus" type="WorkerResponse" minOccurs="0" maxOccurs="unbounded" />
+			<xsd:element name="ResponseList" type="WorkerResponse" minOccurs="0" maxOccurs="unbounded" />
 		</xsd:sequence>
 	</xsd:complexType>
 	
 	<xsd:complexType name="WorkerResponse">
 		<xsd:sequence>
-			<xsd:element name="WorkerError" type="ResponseError" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="Error" type="ResponseError" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 		<xsd:attribute name="host" type="xsd:string" />
 		<xsd:attribute name="body" type="xsd:string" />
@@ -40,46 +41,46 @@
 		<xsd:attribute name="severity" type="xsd:string" />
 	</xsd:complexType>
 
-	<xsd:element name="status" type="JkStatusType" />
+	<xsd:element name="status" type="JkStatus" />
 	
-	<xsd:complexType name="JkStatusType">
+	<xsd:complexType name="JkStatus">
 		<xsd:sequence>
-			<xsd:element name="server" type="JkServerType" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="software" type="JkSoftwareType" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="balancers" type="JkBalancersType" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="ajp_workers" type="JkAjpWorkersType" minOccurs="0" maxOccurs="1" />
-			<xsd:element name="result" type="JkResultType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="server" type="JkServer" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="software" type="JkSoftware" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="balancers" type="JkBalancers" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="ajp_workers" type="JkAjpWorkers" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="result" type="JkResult" minOccurs="0" maxOccurs="1" />
 		</xsd:sequence>
 	</xsd:complexType>
 
-	<xsd:complexType name="JkServerType">
+	<xsd:complexType name="JkServer">
 		<xsd:attribute name="name" type="xsd:string" />
 		<xsd:attribute name="port" type="xsd:int" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkSoftwareType">
+	<xsd:complexType name="JkSoftware">
 		<xsd:attribute name="web_server" type="xsd:string" />
 		<xsd:attribute name="jk_version" type="xsd:string" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkBalancersType">
+	<xsd:complexType name="JkBalancers">
 		<xsd:sequence>
-			<xsd:element name="balancer" type="JkBalancerType" />
+			<xsd:element name="balancer" type="JkBalancer" />
 		</xsd:sequence>
 		<xsd:attribute name="count" type="xsd:int" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkAjpWorkersType">
+	<xsd:complexType name="JkAjpWorkers">
 		<xsd:sequence>
-			<xsd:element name="ajp" type="JkAjpType" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="ajp" type="JkAjp" minOccurs="0" maxOccurs="unbounded"/>
 		</xsd:sequence>
 		<xsd:attribute name="count" type="xsd:int" />
 	</xsd:complexType>
 	
-	<xsd:complexType name="JkBalancerType">
+	<xsd:complexType name="JkBalancer">
 		<xsd:sequence>
-			<xsd:element name="member" type="JkMemberType" maxOccurs="unbounded" />
-			<xsd:element name="map" type="JkMapType" maxOccurs="unbounded" />
+			<xsd:element name="member" type="JkMember" maxOccurs="unbounded" />
+			<xsd:element name="map" type="JkMap" maxOccurs="unbounded" />
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" />
 		<xsd:attribute name="type" type="xsd:string" />
@@ -101,9 +102,9 @@
 		<xsd:attribute name="time_to_maintenance_max" type="xsd:int" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkAjpType">
+	<xsd:complexType name="JkAjp">
 		<xsd:sequence>
-			<xsd:element name="map" type="JkMapType" maxOccurs="unbounded" />
+			<xsd:element name="map" type="JkMap" maxOccurs="unbounded" />
 		</xsd:sequence>
 		<xsd:attribute name="name" type="xsd:string" />
 		<xsd:attribute name="type" type="xsd:string" />
@@ -113,7 +114,7 @@
 		<xsd:attribute name="map_count" type="xsd:int" />
 	</xsd:complexType>
 		
-	<xsd:complexType name="JkMemberType">
+	<xsd:complexType name="JkMember">
 		<xsd:attribute name="name" type="xsd:string" />
 		<xsd:attribute name="type" type="xsd:string" />
 		<xsd:attribute name="host" type="xsd:string" />
@@ -140,7 +141,7 @@
 		<xsd:attribute name="time_to_recover_max" type="xsd:int" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkMapType">
+	<xsd:complexType name="JkMap">
 		<xsd:attribute name="id" type="xsd:int" />
 		<xsd:attribute name="server" type="xsd:string" />
 		<xsd:attribute name="uri" type="xsd:string" />
@@ -148,7 +149,7 @@
 		<xsd:attribute name="source" type="xsd:string" />
 	</xsd:complexType>
 
-	<xsd:complexType name="JkResultType">
+	<xsd:complexType name="JkResult">
 		<xsd:attribute name="type" type="xsd:string" />
 		<xsd:attribute name="message" type="xsd:string" />
 	</xsd:complexType>

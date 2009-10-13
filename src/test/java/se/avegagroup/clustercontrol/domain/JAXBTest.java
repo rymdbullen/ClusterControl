@@ -52,9 +52,10 @@ public class JAXBTest extends TestCase {
 		// Open file
 		final FileInputStream fis = new FileInputStream("src/test/resources/status.xml");
 
-		JAXBElement<JkStatusType> jkStatusType = (JAXBElement<JkStatusType>) unmarshaller.unmarshal(fis);
-		JkStatusType status = jkStatusType.getValue();
-		logger.debug("Balancers.getCount()="+status.getBalancers().getCount());
+		JAXBElement<JkStatus> jkActionStatus = (JAXBElement<JkStatus>) unmarshaller.unmarshal(fis);
+		JkStatus result = jkActionStatus.getValue();
+		assertEquals("Balancers.getCount()", new Integer(1), result.getBalancers().getCount());
+		logger.debug("Balancers.getCount()="+result.getBalancers().getCount());
 	}
 	/**
 	 * 
@@ -84,8 +85,8 @@ public class JAXBTest extends TestCase {
 		// Open file
 		final FileInputStream fis = new FileInputStream("src/test/resources/actionStatus.xml");
 
-		JAXBElement<JkStatusType> jkActionStatusType = (JAXBElement<JkStatusType>) unmarshaller.unmarshal(fis);
-		JkStatusType result = jkActionStatusType.getValue();
+		JAXBElement<JkStatus> jkActionStatus = (JAXBElement<JkStatus>) unmarshaller.unmarshal(fis);
+		JkStatus result = jkActionStatus.getValue();
 		logger.debug("Result: "+result.getResult().getType()+" "+result.getResult().getMessage());
 	}
 	/**
@@ -95,21 +96,21 @@ public class JAXBTest extends TestCase {
 	public void testMarshall() throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
 		ObjectFactory factory = new ObjectFactory();
-		JkStatusType status = factory.createJkStatusType();
-		JkServerType server = factory.createJkServerType();
+		JkStatus status = factory.createJkStatus();
+		JkServer server = factory.createJkServer();
 		server.setName("localhost");
 		status.setServer(server);
-		JkResultType result = new JkResultType();
+		JkResult result = new JkResult();
 		result.setMessage("message");
 		result.setType("type");
 		status.setResult(result);
-		JkBalancersType balancers = factory.createJkBalancersType();
-		JkBalancerType balancer = factory.createJkBalancerType();
-		JkMemberType jkMember = new JkMemberType(); 
+		JkBalancers balancers = factory.createJkBalancers();
+		JkBalancer balancer = factory.createJkBalancer();
+		JkMember jkMember = new JkMember(); 
 		balancer.getMember().add(jkMember);
-		JkMapType map = new JkMapType();
+		JkMap map = new JkMap();
 		balancer.getMap().add(map);
-		JkSoftwareType software = factory.createJkSoftwareType();
+		JkSoftware software = factory.createJkSoftware();
 		balancers.setBalancer(balancer);
 		
 		status.setBalancers(balancers);
@@ -122,13 +123,13 @@ public class JAXBTest extends TestCase {
 		    File schemaFile = new File(url.toURI());
 			mySchema = sf.newSchema( schemaFile );
 		} catch( SAXException saxe ){
-		    // ...(error handling)
+		    // could not read xsd, set null schema
 		    mySchema = null;
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
+			// could not find xsd, set null schema
 			mySchema = null;
 		}
-		JAXBElement<JkStatusType> element = factory.createStatus(status);
+		JAXBElement<JkStatus> element = factory.createStatus(status);
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		m.setSchema(mySchema);

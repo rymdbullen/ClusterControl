@@ -14,16 +14,16 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
-import se.avegagroup.clustercontrol.domain.JkStatusType;
+import se.avegagroup.clustercontrol.configuration.Constants;
+import se.avegagroup.clustercontrol.domain.JkStatus;
 
 public class WorkerStatus {
 	
-	private static final Log logger = LogFactory.getLog(WorkerStatus.class);
-	//private static final Logger logger = LoggerFactory.getLogger(WorkerStatus.class);
+	private static final Logger logger = LoggerFactory.getLogger(WorkerStatus.class);
 	
 	/**
 	 * 
@@ -32,7 +32,7 @@ public class WorkerStatus {
 	 * @throws URISyntaxException 
 	 */
 	@SuppressWarnings("unchecked")
-	public JAXBElement<JkStatusType> unmarshall(String body) {
+	public JkStatus unmarshall(String body) {
 		Schema mySchema;
 		SchemaFactory sf = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
 	
@@ -48,7 +48,7 @@ public class WorkerStatus {
 			mySchema = null;
 		}
 		try {
-			JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
+			JAXBContext jc = JAXBContext.newInstance(Constants.JAXB_DOMAIN_NAMESPACE);
 			Unmarshaller unmarshaller = jc.createUnmarshaller();
 			unmarshaller.setSchema(mySchema);
 			unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
@@ -57,9 +57,8 @@ public class WorkerStatus {
 			// convert string to byte sequence and create the input stream
 			byte currentXMLBytes[] = body.getBytes();
 			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(currentXMLBytes); 
-			
-			JAXBElement<JkStatusType> status = (JAXBElement<JkStatusType>) unmarshaller.unmarshal(byteArrayInputStream);
-			return status;
+			JAXBElement<JkStatus> status = (JAXBElement<JkStatus>) unmarshaller.unmarshal(byteArrayInputStream);
+			return status.getValue();
 		} catch (JAXBException e) {
 			logger.error("Could not unmarshall file: "+e.getErrorCode()+": "+e.getMessage());
 			return null;

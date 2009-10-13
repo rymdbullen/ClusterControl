@@ -4,7 +4,6 @@
 package se.avegagroup.clustercontrol.integration;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,8 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import se.avegagroup.clustercontrol.configuration.Constants;
-import se.avegagroup.clustercontrol.domain.JkBalancerType;
-import se.avegagroup.clustercontrol.domain.JkMemberType;
+import se.avegagroup.clustercontrol.domain.JkBalancer;
+import se.avegagroup.clustercontrol.domain.JkMember;
+import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
@@ -33,34 +33,36 @@ public class WorkerManagerTest extends TestCase {
 		super.setUp();
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
+	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#getBalancers(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 * @throws WorkerNotFoundException 
 	 */
 	public void testInitDouble() throws MalformedURLException, WorkerNotFoundException {
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		URL urll = new URL(Constants.TEST_URL);
+		String urll = Constants.TEST_URL;
 		
-		WorkerResponse response = WorkerManager.init(urll);		
-		if(response.getWorkerError()!=null) {
-			assertEquals(true, response.getBody()==null);
-			assertEquals(true, response.getWorkerError().getMessageKey()!=null);
-			assertEquals(true, response.getWorkerError().getMessageKey().equals(""));			
-		} else {			
-			assertEquals(true, response.getBody()!=null);
-			assertEquals(1,WorkerManager.getHosts().size());
-		}
+		ArrayList<JkStatus> response = WorkerManager.init(urll);		
+//		if(response.getError()!=null) {
+//			assertEquals(true, response.getBody()==null);
+//			assertEquals(true, response.getError().getMessageKey()!=null);
+//			assertEquals(true, response.getError().getMessageKey().equals(""));			
+//		} else {			
+//			assertEquals(true, response.getBody()!=null);
+			assertEquals(2,response.size());
+			assertEquals(2,WorkerManager.getHosts().size());
+//		}
 		
 		response = WorkerManager.init(urll);
-		if(response.getWorkerError()!=null) {
-			assertEquals(true, response.getBody()==null);
-			assertEquals(true, response.getWorkerError().getMessageKey()!=null);
-			assertEquals(true, response.getWorkerError().getMessageKey().equals(""));			
-		} else {			
-			assertEquals(true, response.getBody()!=null);
-			assertEquals(1,WorkerManager.getHosts().size());
-		}
+//		if(response.getError()!=null) {
+//			assertEquals(true, response.getBody()==null);
+//			assertEquals(true, response.getError().getMessageKey()!=null);
+//			assertEquals(true, response.getError().getMessageKey().equals(""));			
+//		} else {			
+//			assertEquals(true, response.getBody()!=null);
+			assertEquals(2,response.size());
+			assertEquals(2,WorkerManager.getHosts().size());
+//		}
 	}		
 	/**
 	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
@@ -80,23 +82,23 @@ public class WorkerManagerTest extends TestCase {
 		fail("Expected WorkerNotFoundException");
 	}*/
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#init(java.net.URL)}.
+	 * Test method for {@link se.avegagroup.clustercontrol.logic.WorkerManager#getBalancers(java.net.URL)}.
 	 * @throws MalformedURLException 
 	 * @throws WorkerNotFoundException 
 	 */
 	public void testInit() throws MalformedURLException, WorkerNotFoundException{
 		WorkerManager.reset();
 		logger.debug("Running testInit");
-		URL urll = new URL(Constants.TEST_URL);
+		String urll = Constants.TEST_URL;
 		
-		WorkerResponse response = WorkerManager.init(urll);
-		JkBalancerType balancer = WorkerManager.statusComplex(response);
+		WorkerResponse response = WorkerManager.getBalancers(urll);
+		JkStatus balancer = WorkerManager.statusComplex(response);
 	
 		assertNotNull(balancer);
-		List<JkMemberType> members = balancer.getMember();
-		Iterator<JkMemberType> membersIter = members.iterator();
+		List<JkMember> members = balancer.getBalancers().getBalancer().getMember();
+		Iterator<JkMember> membersIter = members.iterator();
 		while (membersIter.hasNext()) {
-			JkMemberType jkMember = (JkMemberType) membersIter.next();
+			JkMember jkMember = (JkMember) membersIter.next();
 			logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 		}
 	}
@@ -106,13 +108,14 @@ public class WorkerManagerTest extends TestCase {
 	public void testActivateUnmarshall() throws HttpResponseException {
 		logger.debug("Running testActivateUnmarshall");
 		String worker = "footprint1";
-		ArrayList<JkBalancerType> workerLists = WorkerManager.activate(worker);
+		ArrayList<JkStatus> workerLists = WorkerManager.activate(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
-			JkBalancerType workerList = workerLists.get(i);
-			for (int index = 0; index < workerList.getMemberCount(); index++) {
-				JkMemberType workerStatus = workerList.getMember().get(index);
+			JkStatus workerList = workerLists.get(i);
+			JkBalancer balancer = workerList.getBalancers().getBalancer();
+			for (int index = 0; index < balancer.getMemberCount(); index++) {
+				JkMember workerStatus = balancer.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
-					assertEquals("DIS", workerStatus.getActivation());
+					assertEquals("ACT", workerStatus.getActivation());
 				}
 				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
@@ -124,13 +127,14 @@ public class WorkerManagerTest extends TestCase {
 	public void testDisableUnmarshall() throws HttpResponseException {
 		logger.debug("Running testDisableUnmarshall");
 		String worker = "footprint1";
-		ArrayList<JkBalancerType> workerLists = WorkerManager.disable(worker);
+		ArrayList<JkStatus> workerLists = WorkerManager.disable(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
-			JkBalancerType workerList = workerLists.get(i);
-			for (int index = 0; index < workerList.getMemberCount(); index++) {
-				JkMemberType workerStatus = workerList.getMember().get(index);
+			JkStatus workerList = workerLists.get(i);
+			JkBalancer balancer = workerList.getBalancers().getBalancer();
+			for (int index = 0; index < balancer.getMemberCount(); index++) {
+				JkMember workerStatus = balancer.getMember().get(index);
 				if(worker.equals(workerStatus.getName())) {
-					assertEquals("DIS", workerStatus.getActivation());
+					assertEquals("ACT", workerStatus.getActivation());
 				}
 				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}

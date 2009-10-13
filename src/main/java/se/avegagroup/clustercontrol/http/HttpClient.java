@@ -1,6 +1,9 @@
 package se.avegagroup.clustercontrol.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
@@ -12,8 +15,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.avegagroup.clustercontrol.domain.Host;
 import se.avegagroup.clustercontrol.domain.Hosts;
-import se.avegagroup.clustercontrol.domain.HostType;
 import se.avegagroup.clustercontrol.domain.ResponseError;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
@@ -25,20 +28,27 @@ public class HttpClient {
 
 	/**
 	 * Executes urls
+	 * @param _hosts the hosts to request
 	 * @param parameters the parameters to execute
 	 * @return the workerlists, ie html bodys
+	 * @throws MalformedURLException 
+	 * @throws URISyntaxException 
 	 */
 	public static WorkerResponses executeUrls(Hosts _hosts, String parameters) {
-		int hostsCount = _hosts.getHost().size();
+		int hostsCount = _hosts.getHostList().size();
 		WorkerResponses workerResponses = new WorkerResponses();
 		
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			HostType host = _hosts.getHost().get(hostIdx);
-			workerResponses.getWorkerStatus().add(executeUrl(host, parameters));
+			Host host = _hosts.getHostList().get(hostIdx);
+			try {
+				workerResponses.getResponseList().add(executeUrl(host, parameters));
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return workerResponses;
 	}
-
 	/**
 	 * Creates the request (GET) and receives a encapsulated response object, ie
 	 * the html body. Returns a WorkerResponse for this request.
@@ -48,12 +58,42 @@ public class HttpClient {
 	 * @param parameters
 	 *            the parameters to execute
 	 * @return the response, ie html body
+	 * @throws MalformedURLException 
+	 * @throws URISyntaxException 
 	 */
-	public static WorkerResponse executeUrl(HostType host, String parameters) {
+	public static WorkerResponse executeUrl(Host host, String parameters) throws MalformedURLException {
 		String targetUrl = createTargetUrl(host, parameters);
-		if(logger.isDebugEnabled()) {
-			logger.debug("executing request " + targetUrl);
-		}
+		return executeUrl(new URL(targetUrl));
+	}
+	/**
+	 * Creates the request (GET) and receives a encapsulated response object, ie
+	 * the html body. Returns a WorkerResponse for this request.
+	 * 
+	 * @param host
+	 * 			  the host to request
+	 * @param parameters
+	 *            the parameters to execute
+	 * @return the response, ie html body
+	 * @throws MalformedURLException 
+	 * @throws URISyntaxException 
+	 */
+	public static WorkerResponse executeUrl(String url, String parameters) throws MalformedURLException {
+		String targetUrl = url+"?"+parameters;
+		return executeUrl(new URL(targetUrl));
+	}
+	/**
+	 * Creates the request (GET) and receives a encapsulated response object, ie
+	 * the html body. Returns a WorkerResponse for this request.
+	 * 
+	 * @param url
+	 * 			  the url to request
+	 * @param parameters
+	 *            the parameters to execute
+	 * @return the response, ie html body
+	 * @throws URISyntaxException 
+	 */
+	public static WorkerResponse executeUrl(URL url) {
+		if(logger.isDebugEnabled()) { logger.debug("executing request " + url.toExternalForm()); }
 		// creates the response handler
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpRequestRetryHandler retryHandler = new RetryHandler();
@@ -62,29 +102,33 @@ public class HttpClient {
 		WorkerResponse workerResponse = new WorkerResponse();
 		String responseBody = null;
 		try {
-			HttpGet httpget = new HttpGet(targetUrl);
+			HttpGet httpget = new HttpGet(url.toExternalForm());
 			org.apache.http.client.ResponseHandler<String> responseHandler = new BasicResponseHandler();
 			responseBody = (String) httpclient.execute(httpget, responseHandler);
 			workerResponse.setBody(responseBody);
-			workerResponse.setHost(host.getIpAddress());
+			workerResponse.setHost(url.getHost());
 		} catch (ClientProtocolException e) {
 			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpResponseException) {
-				logger.error("Failed to get response for: "+host.getIpAddress()+", "+host.getPort()+", "+host.getContext());
+				logger.error("Failed to get response for: "+url.getHost()+", "+url.getPort()+", "+url.getPath());
+			} else {
+				logger.error("ClientProtocolException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
 			}
 			ResponseError responseError = new ResponseError();
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
-			workerResponse.setWorkerError(responseError);
+			workerResponse.setError(responseError);
 		} catch (IOException e) {
 			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpHostConnectException) {
-				logger.error("Failed to connect to host: "+host.getIpAddress()+", "+host.getPort());
+				logger.error("Failed to connect to host: "+url.getHost()+", "+url.getPort());
+			} else {
+				logger.error("IOException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
 			}
 			ResponseError responseError = new ResponseError();
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
-			workerResponse.setWorkerError(responseError);
+			workerResponse.setError(responseError);
 		}
 		// shutdown the client
 		httpclient.getConnectionManager().shutdown();
@@ -96,7 +140,7 @@ public class HttpClient {
 	 * @param parameters the control parameters, added as url parameters 
 	 * @return the target url to execute by the http client
 	 */
-	public static String createTargetUrl(HostType host, String parameters) {
+	public static String createTargetUrl(Host host, String parameters) {
 		Integer port = host.getPort();
 		String portPart = "";
 		String targetHost = "";

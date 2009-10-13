@@ -6,10 +6,11 @@
     <create creator="new" javascript="JkController" scope="script">
       <param name="class" value="se.avegagroup.clustercontrol.action.ControllerActionBean"/>
     </create>
-	<convert match="se.avegagroup.clustercontrol.domain.JkMemberType" converter="bean"/>
-	<convert match="se.avegagroup.clustercontrol.domain.JkBalancerType" converter="bean"/>
-	<convert match="se.avegagroup.clustercontrol.domain.JkMapType" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.domain.JkStatus" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.domain.JkMember" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.domain.JkBalancer" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.domain.JkMap" converter="bean"/>
 	<convert match="se.avegagroup.clustercontrol.domain.Hosts" converter="bean"/>
-	<convert match="se.avegagroup.clustercontrol.domain.HostType" converter="bean"/>
+	<convert match="se.avegagroup.clustercontrol.domain.Host" converter="bean"/>
   </allow>
 </dwr>
