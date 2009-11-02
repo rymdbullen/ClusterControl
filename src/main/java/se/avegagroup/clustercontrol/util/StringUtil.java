@@ -26,6 +26,9 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 	 * @return
 	 */
 	private static String addUpdateParameters(String loadBalancer, String worker, String command) {
+		if(loadBalancer==null||worker==null) {
+			throw new IllegalArgumentException("loadBalancer name must be specified");
+		}
 		String parameters = "cmd=update&from=list&w="+ loadBalancer +"&sw="+ worker +"&wa="+ command +"&wf=1&wn="+ worker +"&wr=&wc=&wd=0";
 		return (parameters);
 	}

@@ -15,7 +15,6 @@ import se.avegagroup.clustercontrol.domain.Host;
 import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.domain.JkMember;
 import se.avegagroup.clustercontrol.domain.JkResult;
-import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.http.HttpClient;
@@ -31,6 +30,7 @@ public class WorkerManager {
 	private static final String RESPONSE_FORMAT_TEXT = "txt";
 	/** the hosts container */
 	private static Hosts _hosts = new Hosts();
+	private static String _loadBalancer;
 	private static String _context;
 	private static String _protocol;
 	private static int _port = -1;
@@ -42,7 +42,7 @@ public class WorkerManager {
 	 * @throws WorkerNotFoundException 
 	 */
 	public static ArrayList<JkStatus> init(String url) throws MalformedURLException, WorkerNotFoundException {		
-		if(logger.isDebugEnabled()) { logger.debug("Initializing with url: "+url); }
+		logger.info("Initializing with url: "+url);
 		//
 		// if no members return null or add other hosts?
 		HashSet<String> addressSet = null;
@@ -62,6 +62,9 @@ public class WorkerManager {
 		statuses.add(jkStatus);
 		addHost(createHost(url));
 		
+		if(_loadBalancer==null) {
+			_loadBalancer = jkStatus.getBalancers().getBalancer().getName();
+		}		
 		if(logger.isDebugEnabled()) { logger.debug("More than one unique host found. Trying to init {} hosts", addressSet.size()); }
 		Iterator<String> addressIterator = addressSet.iterator();
 		while (addressIterator.hasNext()) {
@@ -222,7 +225,7 @@ public class WorkerManager {
 	 * @return list of balancers
 	 */
 	public static ArrayList<JkStatus> activate(String worker) {
-		return activate(_hosts.getLoadBalancer(), worker);
+		return activate(_loadBalancer, worker);
 	}
 
 	/**
@@ -249,7 +252,7 @@ public class WorkerManager {
 	 * @return list of balancers
 	 */
 	public static ArrayList<JkStatus> disable(String worker) {
-		return disable(_hosts.getLoadBalancer(), worker);
+		return disable(_loadBalancer, worker);
 	}
 	/**
 	 * Parses the supplied workerResponses and 
@@ -317,7 +320,7 @@ public class WorkerManager {
 	 * @return list of balancers
 	 */
 	public static List<JkStatus> stop(String worker) {
-		return stop(_hosts.getLoadBalancer(), worker);
+		return stop(_loadBalancer, worker);
 	}
 	/**
 	 * Returns the balancers

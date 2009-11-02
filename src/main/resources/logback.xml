@@ -3,7 +3,7 @@
 <configuration>
   <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
     <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>[%d{HH:mm:ss}] %-5p %c %x - %m%n</Pattern>
+      <Pattern>[%d{HH:mm:ss}] %-5p %c - %m%n</Pattern>
     </layout>
   </appender>
   <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -12,7 +12,7 @@
     <!--for further documentation-->
     <File>${user.home}/stripesquick.log</File>
     <layout class="ch.qos.logback.classic.PatternLayout">
-      <Pattern>[%d{HH:mm:ss}] %-5p %c %x - %m%n</Pattern>
+      <Pattern>[%d{HH:mm:ss}] %-5p %c - %m%n</Pattern>
     </layout>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <FileNamePattern>${user.home}/stripesquick.log.%d{yyyy-MM-dd}</FileNamePattern>

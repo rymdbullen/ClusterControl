@@ -2,7 +2,6 @@ package se.avegagroup.clustercontrol.action;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
 import se.avegagroup.clustercontrol.domain.Host;
-import se.avegagroup.clustercontrol.domain.JkBalancer;
 import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
@@ -79,9 +77,6 @@ public class ControllerActionBean extends BaseActionBean {
 	public static ArrayList<JkStatus> disable(String loadBalancer, String worker) {
 		return WorkerManager.disable(loadBalancer, worker);
 	}
-//	public static List<JkBalancer> disable(String loadBalancer, String worker) {
-//		return WorkerManager.disable(loadBalancer, worker);
-//	}
 	/**
 	 * 
 	 * @param loadBalancer

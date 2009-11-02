@@ -32,6 +32,7 @@ public class WorkerStatusTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		logger.debug("==================================================");
 		logger.debug("Running tests against: "+Constants.TEST_URL);
 		WorkerManager.init(Constants.TEST_URL);
 	}
@@ -57,7 +58,7 @@ public class WorkerStatusTest extends TestCase {
 			Iterator<JkMember> membersIter = members.iterator();
 			while (membersIter.hasNext()) {
 				JkMember jkMember = (JkMember) membersIter.next();
-				logger.debug(jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
+				logger.debug("["+hostIdx+"]: "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getState());
 			}
 		}
 	}
@@ -73,10 +74,10 @@ public class WorkerStatusTest extends TestCase {
 			JkBalancer balancer = workerList.getBalancers().getBalancer();
 			for (int index = 0; index < balancer.getMemberCount(); index++) {
 				JkMember workerStatus = balancer.getMember().get(index);
+				logger.debug("["+i+":"+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("ACT", workerStatus.getActivation());
 				}
-				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
@@ -92,10 +93,10 @@ public class WorkerStatusTest extends TestCase {
 			JkBalancer balancer = workerList.getBalancers().getBalancer();
 			for (int index = 0; index < balancer.getMemberCount(); index++) {
 				JkMember workerStatus = balancer.getMember().get(index);
+				logger.debug("["+i+":"+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("DIS", workerStatus.getActivation());
 				}
-				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}

@@ -17,6 +17,12 @@ import junit.framework.TestCase;
 
 public class ControllerActionBeanTest extends TestCase {
 	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBeanTest.class);
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		logger.debug("==================================================");
+
+	}
 	public void testInitWithUrl() throws MalformedURLException {
 		WorkerManager.reset();
 		logger.debug("Running tests against: "+Constants.TEST_URL);
@@ -40,10 +46,10 @@ public class ControllerActionBeanTest extends TestCase {
 			JkBalancer balancer = workerList.getBalancers().getBalancer();
 			for (int index = 0; index < balancer.getMemberCount(); index++) {
 				JkMember workerStatus = balancer.getMember().get(index);
+				logger.debug("["+i+":"+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("DIS", workerStatus.getActivation());
 				}
-				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
@@ -57,10 +63,10 @@ public class ControllerActionBeanTest extends TestCase {
 			JkBalancer balancer = workerList.getBalancers().getBalancer();
 			for (int index = 0; index < balancer.getMemberCount(); index++) {
 				JkMember workerStatus = balancer.getMember().get(index);
+				logger.debug("["+i+":"+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 				if(worker.equals(workerStatus.getName())) {
 					assertEquals("ACT", workerStatus.getActivation());
 				}
-				logger.debug("["+index+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
 			}
 		}
 	}
