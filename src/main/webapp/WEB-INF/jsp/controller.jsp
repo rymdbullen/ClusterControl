@@ -2,12 +2,13 @@
 
 <s:layout-render name="/WEB-INF/jsp/layout.jsp" title="ClusterControl">
 	<s:layout-component name="body">
-		<!-- Combo-handled YUI CSS files: -->
+		<!-- Combo-handled YUI CSS files: ->
 		<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.8.0r4/build/container/assets/skins/sam/container.css">
-		<!-- Combo-handled YUI JS files: -->
+		<!- Combo-handled YUI JS files: ->
 		<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js&2.8.0r4/build/animation/animation-min.js&2.8.0r4/build/container/container-min.js"></script>
-		
-		<script type="text/javascript"> <!--
+		-->
+		<script type="text/javascript">
+		<!--
 			function convertToGetAndRelocate(actionValue) {
 				document.jkaggregator.autorefresh.value = actionValue;
 				var interval = document.jkaggregator.refreshinterval.value;
@@ -20,7 +21,8 @@
 				url = url + 'refreshinterval=' + interval;
 				window.location.replace(url);
 			}
-		--></script>
+		-->
+		</script>
 		<script type="text/javascript"><!--
     	function init() {
     	  dwr.util.useLoadingMessage();
@@ -54,16 +56,19 @@
         	enableControls();
 	        dwr.util.setValue("demoReply", initStatus);
         }
-        function renderStatus(balancers) {
+        function renderStatusNew(jkStatuses) {
+        	dwr.util.setValue("newStatus", jkStatuses);
+        }
+        function renderStatus(jkStatuses) {
         	// Delete all the rows except for the "pattern" row
             dwr.util.removeAllRows("statusbody", { filter:function(tr) {
               return (tr.id != "pattern");
             }});
 
             var balancer, members, member, id;
-        	for (var balancerIdx = 0; balancerIdx < balancers.length; balancerIdx++) {
-        		balancer = balancers[balancerIdx];
-        		members = balancer.member;
+        	for (var jkStatusIdx = 0; jkStatusIdx < jkStatuses.length; jkStatusIdx++) {
+        		jkStatus = jkStatuses[jkStatusIdx];alert(balancer);
+        		members = jkStatus.balancers.balancer.member;
         		
 	        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
 	            	member = members[memberIdx];
@@ -83,6 +88,7 @@
 	              		$("btnDis" + id).disabled = true;
 	              	}
 	              	$("pattern" + id).style.display = "table-row";
+	              	alert('hej'+memberIdx);
 	        	}
 	        }
         	dwr.util.setValue("demoReply", "Init OK");
@@ -91,6 +97,14 @@
         function getStatusComplex() {
       	  	var name = dwr.util.getValue("demoName");
       	  	JkController.getStatusComplex(name, renderStatus);
+      	}
+        function initWithUrlNew() {
+      	  	var url = dwr.util.getValue("hostname");
+      	  	JkController.initWithUrl(url, {
+      	  		callback:function(balancers) { renderStatus(balancers); },
+      	  		timeout:5000,
+      	  		errorHandler:function(message) { alert("Oops: Could not initialize: "+ url + " : " + message); }		
+      	  	});
       	}
         function initWithUrl() {
       	  	var url = dwr.util.getValue("hostname");
@@ -156,11 +170,12 @@
 
 					</div>  --><!-- /workers -->
 		</p>
+		NewStatus: <span id="newStatus"></span>
 		<table border="1" class="rowed grey">
 			<thead>
 				<tr>
 					<th>Host</th>
-					<th>Worker</th>
+					<th id="cellPattern">Worker</th>
 					<th>State</th>
 					<th>Activation</th>
 					<th>Actions</th>
@@ -169,7 +184,7 @@
 			<tbody id="statusbody">
 				<tr id="pattern" style="display: none;">
 					<td><span id="columnHost">Host</span></td>
-					<td><span id="columnWorker">Worker</span></td>
+					<td id="cellPattern"><span id="columnWorker">Worker</span></td>
 					<td><span id="columnState">State</span></td>
 					<td><span id="columnActivation">Activation</span></td>
 					<td><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
@@ -188,7 +203,7 @@
 		<h3>TODO</h3>
 		<li>
 			<ul>1. Quartz or javascript timer, how to push...</ul>
-			<ul>2. Handle more than one host: backend and frontend, ie tables</ul>
+			<ul>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</ul>
 			<ul>3. Ask tomcat manager for contexts</ul>
 			<ul>4. Visual Enhancement</ul>
 			<ul>Show current sessions, etc etc</ul>

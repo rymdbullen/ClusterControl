@@ -9,9 +9,9 @@
     <link rel="stylesheet" type="text/css" href="${contextPath}/css/style.css">
     <s:layout-component name="head">
     </s:layout-component>
-    <script type='text/javascript' src='/clustercontrol/dwr/interface/JkController.js'></script>
-    <script type='text/javascript' src='/clustercontrol/dwr/engine.js'></script>
-    <script type='text/javascript' src='/clustercontrol/dwr/util.js'></script>
+    <script type='text/javascript' src='/dwr/interface/JkController.js'></script>
+    <script type='text/javascript' src='/dwr/engine.js'></script>
+    <script type='text/javascript' src='/dwr/util.js'></script>
   </head>
   <body onload="javascript:init()">
     <div id="main">

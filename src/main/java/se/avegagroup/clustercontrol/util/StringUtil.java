@@ -53,27 +53,6 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 	public static String getMimeTextParameters() {
 		return "mime=txt&opt=4";
 	}
-
-	/**
-	 * Returns the ipaddress from host including possible port
-	 * @param host the complete host including possible port
-	 * @return the ipaddress
-	 */
-	public static String getAddress(String host) {
-		String strippedHost = host.replaceAll("(:\\d{1,6})", "");
-System.out.println(strippedHost);
-		return strippedHost;
-	}
-	/**
-	 * Returns the port from host including possible port
-	 * @param host the complete host including possible port
-	 * @return the port
-	 */
-	public static int getPort(String host) {
-		String strippedPort = host.replaceAll("([\\.\\d]*:)", "");
-System.out.println(strippedPort);
-		return Integer.parseInt(strippedPort);
-	}
 	/**
 	 * Checks and assures that the context not ends with a slash 
 	 * @param path the path to check
