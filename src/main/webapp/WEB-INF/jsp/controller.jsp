@@ -7,23 +7,20 @@
 		<!- Combo-handled YUI JS files: ->
 		<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.8.0r4/build/yahoo-dom-event/yahoo-dom-event.js&2.8.0r4/build/animation/animation-min.js&2.8.0r4/build/container/container-min.js"></script>
 		-->
-		<script type="text/javascript">
-		<!--
-			function convertToGetAndRelocate(actionValue) {
-				document.jkaggregator.autorefresh.value = actionValue;
-				var interval = document.jkaggregator.refreshinterval.value;
-				var autorefresh = actionValue;
-				var url = window.location+'?';
-				if(url.indexOf('autorefresh')!=-1) {
-					url = window.location.protocol + '//' +window.location.host + window.location.pathname +'?';
-				}
-				url = url + 'autorefresh=' + autorefresh + '&';
-				url = url + 'refreshinterval=' + interval;
-				window.location.replace(url);
-			}
-		-->
-		</script>
 		<script type="text/javascript"><!--
+		function convertToGetAndRelocate(actionValue) {
+			//document.jkaggregator.autorefresh.value = actionValue;
+			var interval = dwr.util.getValue("autorefreshinterval");
+			var autorefresh = actionValue;
+			var url = window.location+'?';
+			if(url.indexOf('autorefresh')!=-1) {
+				url = window.location.protocol + '//' +window.location.host + window.location.pathname +'?';
+			}
+			url = url + 'autorefresh=' + autorefresh + '&';
+			url = url + 'refreshinterval=' + interval;
+			window.location.replace(url);
+		}
+
     	function init() {
 			dwr.util.useLoadingMessage();
 			JkController.isInitialized('workerName', renderInit);
@@ -104,7 +101,7 @@
 	            	member = members[memberIdx];
 		            var thisId = member.name;
 	              	dwr.util.cloneNode("columnWorker" + id, { idSuffix:thisId });
-	              	dwr.util.setValue("columnWorker" + id + thisId, member.activation);
+	              	dwr.util.setValue("columnWorker" + id + thisId, member.activation + " - " + member.state);
 	              	dwr.util.cloneNode("cpcolumnWorker", { idSuffix:thisId });
 	              	//
 	              	// header
@@ -123,6 +120,7 @@
 	              		$("columnWorker" + id + thisId).style.backgroundColor = "red";
 	              		$("btnAct" + thisId).disabled = false;
 	              		$("btnDis" + thisId).disabled = true;
+		              	$("activation" + thisId).style.display = "block";
 	              	}
 	              	$("columnWorker" + id + thisId).style.display = "table-cell";
 	              	$("cpcolumnWorker" + thisId).style.display = "table-cell";
@@ -139,7 +137,7 @@
 			<span class="header">AutoRefresh</span>
 			On&nbsp;<input type="radio" name="autorefresh" value="on"  onclick="javascript:convertToGetAndRelocate(this.value);" />
 			Off&nbsp;<input type="radio" name="autorefresh" value="off"  onclick="javascript:convertToGetAndRelocate(this.value);" />
-			Interval&nbsp;<input type="text" name="refreshinterval" value="30" size="3" maxlength="3" />
+			Interval&nbsp;<input id="autorefreshinterval" type="text" value="30" size="3" maxlength="3" />
 		</p>
 		<p>
 		</p>
@@ -158,13 +156,17 @@
 				</tr>
 				<tr id="cppattern">
 					<td id="columnHost">Controls</td>
-					<td id="cpcolumnWorker" style="display: none;"><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" /></td>
+					<td id="cpcolumnWorker" style="display: none;">
+						<input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
+						<div id="activation" style="display: none;">
+							S:<input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="javascript:setEnableRate('enable', this.value);" />
+							M:<input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="javascript:setEnableRate('enable', this.value);" />
+							F:<input type="radio" name="enablerate" value="fast" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />
+						</div>
+					</td>
 				</tr>
 			</tbody>
 		</table>
-		<br/>
-		<br/>
-		<br/>
 		<br/>
 		<br/>
 		<!-- 		
@@ -206,11 +208,14 @@
 		<h3>TODO</h3>
 		<ul>
 			<li>1. Quartz or javascript timer, how to push...</li>
-			<li>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
 			<li>3. Ask tomcat manager for contexts</li>
-			<li>4. Visual Enhancement</li>
 			<li>Show current sessions, etc etc</li>
 			<li>Handle different jk versions</li>
+		</ul>
+		<h3>Done</h3>
+		<ul>
+			<li>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
+			<li>4. Visual Enhancement</li>
 		</ul>
 	</s:layout-component>
 </s:layout-render>
