@@ -56,46 +56,8 @@
         	enableControls();
 	        dwr.util.setValue("demoReply", initStatus);
         }
-        function renderStatusNew(jkStatuses) {
-        	dwr.util.setValue("newStatus", jkStatuses);
-        }
-        function renderStatus(jkStatuses) {
-        	// Delete all the rows except for the "pattern" row
-            dwr.util.removeAllRows("statusbody", { filter:function(tr) {
-              return (tr.id != "pattern");
-            }});
-
-            var balancer, members, member, id;
-        	for (var jkStatusIdx = 0; jkStatusIdx < jkStatuses.length; jkStatusIdx++) {
-        		jkStatus = jkStatuses[jkStatusIdx];alert(balancer);
-        		members = jkStatus.balancers.balancer.member;
-        		
-	        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
-	            	member = members[memberIdx];
-		            id = member.name;
-		            dwr.util.cloneNode("pattern", { idSuffix:id });
-	              	dwr.util.setValue("columnHost" + id, member.host);
-	              	dwr.util.setValue("columnWorker" + id, member.name);
-	              	dwr.util.setValue("columnState" + id, member.state);
-	              	dwr.util.setValue("columnActivation" + id, member.activation);
-	              	if(member.activation == "ACT" ) {
-		              	$("columnActivation" + id).style.backgroundColor = "green";
-	              		$("btnAct" + id).disabled = true;
-	              		$("btnDis" + id).disabled = false;
-	              	} else if(member.activation != "ACT" ) {
-	              		$("columnActivation" + id).style.backgroundColor = "red";
-	              		$("btnAct" + id).disabled = false;
-	              		$("btnDis" + id).disabled = true;
-	              	}
-	              	$("pattern" + id).style.display = "table-row";
-	              	alert('hej'+memberIdx);
-	        	}
-	        }
-        	dwr.util.setValue("demoReply", "Init OK");
-        	enableControls();
-        }
         function getStatusComplex() {
-      	  	var name = dwr.util.getValue("demoName");
+      	  	var name = dwr.util.getValue("demoReply");
       	  	JkController.getStatusComplex(name, renderStatus);
       	}
         function initWithUrlNew() {
@@ -116,13 +78,56 @@
       	}
         function disableClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(6);
+        	  var person = eleid.substring(21);
         	  disable(person);
         }
         function activateClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(6);
+        	  var person = eleid.substring(21);
         	  activate(person);
+        }
+        function renderStatus(jkStatuses) {
+        	// Delete all the rows except for the "pattern" row
+            dwr.util.removeAllRows("statusbody", { filter:function(tr) {
+              return (tr.id != "pattern");
+            }});
+
+            var members, member, id;
+        	for (var jkStatusIdx = 0; jkStatusIdx < jkStatuses.length; jkStatusIdx++) {
+        		jkStatus = jkStatuses[jkStatusIdx];
+        		members = jkStatus.balancers.balancer.member;
+//alert('jkStatusIdx='+jkStatusIdx+' '+jkStatus.balancers.balancer.name);
+	            id = jkStatus.server.name;
+	            dwr.util.cloneNode("pattern", { idSuffix:id });
+              	dwr.util.setValue("columnHost" + id, jkStatus.server.name);
+              	$("pattern" + id).style.display = "table-row";
+	        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
+	            	member = members[memberIdx];
+		            var thisId = member.name;
+	              	dwr.util.cloneNode("columnWorker" + id, { idSuffix:thisId });
+	              	dwr.util.setValue("columnWorker" + id + thisId, member.activation);
+	              	//
+	              	// header
+	              	if(jkStatusIdx == 1) {
+	              		dwr.util.cloneNode("headerWorker", { idSuffix:thisId });
+	              		dwr.util.setValue("headerWorker" + thisId, member.name);
+	              		$("headerWorker" + thisId).style.display = "block";
+	              	}
+	              	if(member.activation == "ACT" ) {
+		              	$("columnWorker" + id + thisId).style.backgroundColor = "green";
+	              		//$("btnAct" + id + thisId).disabled = true;
+	              		//$("btnDis" + id + thisId).disabled = false;
+	              	} else if(member.activation != "ACT" ) {
+	              		$("columnWorker" + id + thisId).style.backgroundColor = "red";
+	              		//$("btnAct" + id + thisId).disabled = false;
+	              		//$("btnDis" + id + thisId).disabled = true;
+	              	}
+	              	$("columnWorker" + id + thisId).style.display = "block";
+//alert('memberIdx='+memberIdx);
+	        	}
+	        }
+        	dwr.util.setValue("demoReply", "Init OK");
+        	enableControls();
         }
     --></script>
 		<h1>JK Status</h1>
@@ -136,6 +141,33 @@
 			Interval&nbsp;<input type="text" name="refreshinterval" value="30" size="3" maxlength="3" />
 		</p>
 		<p>
+		</p>
+		Status: <span id="newStatus"></span>
+		<table border="1" class="rowed grey">
+			<thead>
+				<tr>
+					<th>Host</th>
+					<th id="headerWorker" style="display: none;">Workers</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="statusbody">
+				<tr id="pattern" style="display: none;">
+					<!-- td><span id="columnHost">Host</span></td -->
+					<!-- td><span class="worker" id="columnWorker"></span></td -->
+					<td id="columnHost">Host</td>
+					<td id="columnWorker" style="display: none;">Worker</td>
+					<td>
+						<input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
 		<!-- 		
 					<div class="workers">
 						<span class="jkcontrollerheader">2. Intervals</span><br/>
@@ -169,46 +201,17 @@
 								 : <input type="radio" name="enablerate" value="disable" onclick="javascript:setEnableRate('disable', '');" />
 
 					</div>  --><!-- /workers -->
-		</p>
-		NewStatus: <span id="newStatus"></span>
-		<table border="1" class="rowed grey">
-			<thead>
-				<tr>
-					<th>Host</th>
-					<th id="cellPattern">Worker</th>
-					<th>State</th>
-					<th>Activation</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody id="statusbody">
-				<tr id="pattern" style="display: none;">
-					<td><span id="columnHost">Host</span></td>
-					<td id="cellPattern"><span id="columnWorker">Worker</span></td>
-					<td><span id="columnState">State</span></td>
-					<td><span id="columnActivation">Activation</span></td>
-					<td><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<p>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
-		<br/>
+
 		<br/>
 		<br/>
 		<h3>TODO</h3>
-		<li>
-			<ul>1. Quartz or javascript timer, how to push...</ul>
-			<ul>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</ul>
-			<ul>3. Ask tomcat manager for contexts</ul>
-			<ul>4. Visual Enhancement</ul>
-			<ul>Show current sessions, etc etc</ul>
-			<ul>Handle different jk versions</ul>
-		</li>
-		</p>
+		<ul>
+			<li>1. Quartz or javascript timer, how to push...</li>
+			<li>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
+			<li>3. Ask tomcat manager for contexts</li>
+			<li>4. Visual Enhancement</li>
+			<li>Show current sessions, etc etc</li>
+			<li>Handle different jk versions</li>
+		</ul>
 	</s:layout-component>
 </s:layout-render>

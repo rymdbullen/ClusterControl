@@ -89,3 +89,8 @@ pre { background:#f4f4f4; padding:10px; }
 
 #gidemo table { border-collapse:separate; border-spacing:0; }
 #gidemo table, #gidemo td, #gidemo th { border:0; padding:0; }
+
+.worker {
+  	padding:5px;
+  	border:1px solid #ccc;
+}
