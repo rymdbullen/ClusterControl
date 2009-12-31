@@ -25,8 +25,8 @@
 		</script>
 		<script type="text/javascript"><!--
     	function init() {
-    	  dwr.util.useLoadingMessage();
-    	  JkController.isInitialized('workerName', renderInit);
+			dwr.util.useLoadingMessage();
+			JkController.isInitialized('workerName', renderInit);
     	}
         function activate(workerName) {
       	  	var loadBalancer = "lbfootprint";
@@ -52,6 +52,8 @@
 	        	dwr.util.setValue("demoReply", "not initialized");
 	        	disableControls();
 	        	return;
+        	} else {
+        		getStatusComplex();
         	}
         	enableControls();
 	        dwr.util.setValue("demoReply", initStatus);
@@ -59,14 +61,6 @@
         function getStatusComplex() {
       	  	var name = dwr.util.getValue("demoReply");
       	  	JkController.getStatusComplex(name, renderStatus);
-      	}
-        function initWithUrlNew() {
-      	  	var url = dwr.util.getValue("hostname");
-      	  	JkController.initWithUrl(url, {
-      	  		callback:function(balancers) { renderStatus(balancers); },
-      	  		timeout:5000,
-      	  		errorHandler:function(message) { alert("Oops: Could not initialize: "+ url + " : " + message); }		
-      	  	});
       	}
         function initWithUrl() {
       	  	var url = dwr.util.getValue("hostname");
@@ -78,27 +72,30 @@
       	}
         function disableClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(14);
-        	  //alert(person);
+        	  var person = eleid.substring(6);
         	  disable(person);
         }
         function activateClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(14);
-        	  //alert(person);
+        	  var person = eleid.substring(6);
         	  activate(person);
         }
         function renderStatus(jkStatuses) {
         	// Delete all the rows except for the "pattern" row
             dwr.util.removeAllRows("statusbody", { filter:function(tr) {
-            	return (tr.id != "pattern");
+                var retval = true;
+                if (tr.id != "pattern") {
+                    retval = false;
+                } else if (tr.id != "cppattern") {
+                    retval = false;
+                }
+            	return retval;
             }});
 
             var members, member, id;
         	for (var jkStatusIdx = 0; jkStatusIdx < jkStatuses.length; jkStatusIdx++) {
         		jkStatus = jkStatuses[jkStatusIdx];
         		members = jkStatus.balancers.balancer.member;
-//alert('jkStatusIdx='+jkStatusIdx+' '+jkStatus.balancers.balancer.name);
 	            id = jkStatus.server.name;
 	            dwr.util.cloneNode("pattern", { idSuffix:id });
               	dwr.util.setValue("columnHost" + id, jkStatus.server.name);
@@ -108,6 +105,7 @@
 		            var thisId = member.name;
 	              	dwr.util.cloneNode("columnWorker" + id, { idSuffix:thisId });
 	              	dwr.util.setValue("columnWorker" + id + thisId, member.activation);
+	              	dwr.util.cloneNode("cpcolumnWorker", { idSuffix:thisId });
 	              	//
 	              	// header
 	              	if(jkStatusIdx == 1) {
@@ -115,52 +113,22 @@
 	              		dwr.util.setValue("headerWorker" + thisId, member.name);
 	              		$("headerWorker" + thisId).style.display = "table-cell";
 	              	}
+	              	//
+	              	// set color and enable controls
 	              	if(member.activation == "ACT" ) {
 		              	$("columnWorker" + id + thisId).style.backgroundColor = "green";
-	              		//$("btnAct" + id + thisId).disabled = true;
-	              		//$("btnDis" + id + thisId).disabled = false;
+		              	$("btnAct" + thisId).disabled = true;
+	              		$("btnDis" + thisId).disabled = false;
 	              	} else if(member.activation != "ACT" ) {
 	              		$("columnWorker" + id + thisId).style.backgroundColor = "red";
-	              		//$("btnAct" + id + thisId).disabled = false;
-	              		//$("btnDis" + id + thisId).disabled = true;
+	              		$("btnAct" + thisId).disabled = false;
+	              		$("btnDis" + thisId).disabled = true;
 	              	}
 	              	$("columnWorker" + id + thisId).style.display = "table-cell";
-//alert('memberIdx='+memberIdx);
+	              	$("cpcolumnWorker" + thisId).style.display = "table-cell";
 	        	}
 	        }
-	        addControls(jkStatuses[0]);
-        	//dwr.util.setValue("demoReply", "Init OK");
-        	//enableControls();
-        }
-        function addControls(jkStatus) {
-            var members = jkStatus.balancers.balancer.member;
-            var id = "controls";
-            dwr.util.cloneNode("cpattern", { idSuffix:id });
-          	dwr.util.setValue("ccolumnHost" + id, "Controls");
-          	$("cpattern" + id).style.display = "table-row";
-        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
-            	member = members[memberIdx];
-	            var thisId = member.name;
-              	dwr.util.cloneNode("ccolumnWorker" + id, { idSuffix:thisId });
-              	//dwr.util.setValue("ccolumnWorker" + id + thisId, member.activation);
-              	//
-              	// header
-              	dwr.util.cloneNode("cheaderWorker", { idSuffix:thisId });
-              	dwr.util.setValue("cheaderWorker" + thisId, member.name);
-              	$("cheaderWorker" + thisId).style.display = "table-cell";
-              	
-              	if(member.activation == "ACT" ) {
-	              	//$("ccolumnWorker" + id + thisId).style.backgroundColor = "green";
-              		$("btnAct" + id + thisId).disabled = true;
-              		$("btnDis" + id + thisId).disabled = false;
-              	} else if(member.activation != "ACT" ) {
-              		//$("ccolumnWorker" + id + thisId).style.backgroundColor = "red";
-              		$("btnAct" + id + thisId).disabled = false;
-              		$("btnDis" + id + thisId).disabled = true;
-              	}
-              	$("ccolumnWorker" + id + thisId).style.display = "table-cell";
-//alert('memberIdx='+memberIdx);
-        	}
+        	enableControls();
         }
     --></script>
 		<h1>JK Status</h1>
@@ -188,23 +156,13 @@
 					<td id="columnHost">Host</td>
 					<td id="columnWorker" style="display: none;">Worker</td>
 				</tr>
+				<tr id="cppattern">
+					<td id="columnHost">Controls</td>
+					<td id="cpcolumnWorker" style="display: none;"><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" /></td>
+				</tr>
 			</tbody>
 		</table>
 		<br/>
-		<table border="1" class="rowed grey">
-			<thead>
-				<tr>
-					<th>Worker</th>
-					<th id="cheaderWorker" style="display: none;">Workers</th>
-				</tr>
-			</thead>
-			<tbody id="controlsbody">
-				<tr id="cpattern" style="display: none;">
-					<td id="ccolumnHost">Host</td>
-					<td id="ccolumnWorker" style="display: none;"><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" /></td>
-				</tr>
-			</tbody>
-		</table>
 		<br/>
 		<br/>
 		<br/>
