@@ -78,18 +78,20 @@
       	}
         function disableClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(21);
+        	  var person = eleid.substring(14);
+        	  //alert(person);
         	  disable(person);
         }
         function activateClicked(eleid) {
         	  // we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	  var person = eleid.substring(21);
+        	  var person = eleid.substring(14);
+        	  //alert(person);
         	  activate(person);
         }
         function renderStatus(jkStatuses) {
         	// Delete all the rows except for the "pattern" row
             dwr.util.removeAllRows("statusbody", { filter:function(tr) {
-              return (tr.id != "pattern");
+            	return (tr.id != "pattern");
             }});
 
             var members, member, id;
@@ -111,7 +113,7 @@
 	              	if(jkStatusIdx == 1) {
 	              		dwr.util.cloneNode("headerWorker", { idSuffix:thisId });
 	              		dwr.util.setValue("headerWorker" + thisId, member.name);
-	              		$("headerWorker" + thisId).style.display = "block";
+	              		$("headerWorker" + thisId).style.display = "table-cell";
 	              	}
 	              	if(member.activation == "ACT" ) {
 		              	$("columnWorker" + id + thisId).style.backgroundColor = "green";
@@ -122,12 +124,43 @@
 	              		//$("btnAct" + id + thisId).disabled = false;
 	              		//$("btnDis" + id + thisId).disabled = true;
 	              	}
-	              	$("columnWorker" + id + thisId).style.display = "block";
+	              	$("columnWorker" + id + thisId).style.display = "table-cell";
 //alert('memberIdx='+memberIdx);
 	        	}
 	        }
-        	dwr.util.setValue("demoReply", "Init OK");
-        	enableControls();
+	        addControls(jkStatuses[0]);
+        	//dwr.util.setValue("demoReply", "Init OK");
+        	//enableControls();
+        }
+        function addControls(jkStatus) {
+            var members = jkStatus.balancers.balancer.member;
+            var id = "controls";
+            dwr.util.cloneNode("cpattern", { idSuffix:id });
+          	dwr.util.setValue("ccolumnHost" + id, "Controls");
+          	$("cpattern" + id).style.display = "table-row";
+        	for (var memberIdx = 0; memberIdx < members.length; memberIdx++) {
+            	member = members[memberIdx];
+	            var thisId = member.name;
+              	dwr.util.cloneNode("ccolumnWorker" + id, { idSuffix:thisId });
+              	//dwr.util.setValue("ccolumnWorker" + id + thisId, member.activation);
+              	//
+              	// header
+              	dwr.util.cloneNode("cheaderWorker", { idSuffix:thisId });
+              	dwr.util.setValue("cheaderWorker" + thisId, member.name);
+              	$("cheaderWorker" + thisId).style.display = "table-cell";
+              	
+              	if(member.activation == "ACT" ) {
+	              	//$("ccolumnWorker" + id + thisId).style.backgroundColor = "green";
+              		$("btnAct" + id + thisId).disabled = true;
+              		$("btnDis" + id + thisId).disabled = false;
+              	} else if(member.activation != "ACT" ) {
+              		//$("ccolumnWorker" + id + thisId).style.backgroundColor = "red";
+              		$("btnAct" + id + thisId).disabled = false;
+              		$("btnDis" + id + thisId).disabled = true;
+              	}
+              	$("ccolumnWorker" + id + thisId).style.display = "table-cell";
+//alert('memberIdx='+memberIdx);
+        	}
         }
     --></script>
 		<h1>JK Status</h1>
@@ -148,22 +181,30 @@
 				<tr>
 					<th>Host</th>
 					<th id="headerWorker" style="display: none;">Workers</th>
-					<th>Actions</th>
 				</tr>
 			</thead>
 			<tbody id="statusbody">
 				<tr id="pattern" style="display: none;">
-					<!-- td><span id="columnHost">Host</span></td -->
-					<!-- td><span class="worker" id="columnWorker"></span></td -->
 					<td id="columnHost">Host</td>
 					<td id="columnWorker" style="display: none;">Worker</td>
-					<td>
-						<input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
-					</td>
 				</tr>
 			</tbody>
 		</table>
 		<br/>
+		<table border="1" class="rowed grey">
+			<thead>
+				<tr>
+					<th>Worker</th>
+					<th id="cheaderWorker" style="display: none;">Workers</th>
+				</tr>
+			</thead>
+			<tbody id="controlsbody">
+				<tr id="cpattern" style="display: none;">
+					<td id="ccolumnHost">Host</td>
+					<td id="ccolumnWorker" style="display: none;"><input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" /></td>
+				</tr>
+			</tbody>
+		</table>
 		<br/>
 		<br/>
 		<br/>
