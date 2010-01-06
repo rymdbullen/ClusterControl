@@ -91,6 +91,11 @@ pre { background:#f4f4f4; padding:10px; }
 #gidemo table, #gidemo td, #gidemo th { border:0; padding:0; }
 
 .worker {
-  	padding:5px;
+  	padding:3px;
+  	float:left;
+}
+
+.activator {
+	width:200px;
   	border:1px solid #ccc;
 }

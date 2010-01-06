@@ -104,7 +104,6 @@ public class ControllerActionBean extends BaseActionBean {
 	public static ArrayList<JkStatus> initWithUrl(String initUrl) throws MalformedURLException {
 		if(false==WorkerManager.isInitialized()) {
 			try {
-				System.out.println("url="+initUrl);
 				return WorkerManager.init(initUrl);
 			} catch (WorkerNotFoundException e) {
 				logger.debug("Failed to locate worker for url: "+initUrl);

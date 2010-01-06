@@ -13,7 +13,7 @@
     <script type='text/javascript' src='/dwr/engine.js'></script>
     <script type='text/javascript' src='/dwr/util.js'></script>
   </head>
-  <body onload="javascript:init()">
+  <body>
     <div id="main">
       <s:layout-component name="body">
       </s:layout-component>

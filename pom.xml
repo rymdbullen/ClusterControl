@@ -384,6 +384,6 @@
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<slf4j.version>1.5.9.RC1</slf4j.version>
+		<slf4j.version>1.5.10</slf4j.version>
 	</properties>
 </project>

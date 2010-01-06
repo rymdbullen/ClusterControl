@@ -43,6 +43,9 @@ public class WorkerManager {
 	 */
 	public static ArrayList<JkStatus> init(String url) throws MalformedURLException, WorkerNotFoundException {		
 		logger.info("Initializing with url: "+url);
+		if(false==url.startsWith("http")) {
+			url = "http://"+url;
+		}
 		//
 		// if no members return null or add other hosts?
 		HashSet<String> addressSet = null;
@@ -70,7 +73,7 @@ public class WorkerManager {
 		while (addressIterator.hasNext()) {
 			String ipaddress = (String) addressIterator.next();
 			if(ipaddress.equals(jkStatus.getServer().getName())) {
-				if(logger.isDebugEnabled()) { logger.debug("Skipped already added host: "+ipaddress); }
+				if(logger.isDebugEnabled()) { logger.debug("Skipped existing host: "+ipaddress); }
 				continue;
 			}
 			String newUrl = createUrlForIpaddress(ipaddress);
