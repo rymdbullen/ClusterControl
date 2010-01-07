@@ -121,8 +121,10 @@
         }
         function renderStatus(jkStatuses) 
         {
+            // enable table and controls
         	if(jkStatuses != undefined && jkStatuses.length>0) {
         		$("statustable").style.display = "table";
+        		$("autorefreshtext").style.display = "block";
             }
             
         	// Delete all the rows except for the "pattern" or "controlpattern" row
@@ -178,18 +180,13 @@
         // runs at body onload
         window.onload=atload;
     --></script>
-    	<h1>JK Status</h1>
-		<p>
-			Target URL: <input type="text" id="hostname" size="50" /><input id="btnInitWithUrl" value="Initialize" type="button" onclick="initWithUrl()" /> <br />
-			<br />
-			Status: <span id="demoReply"></span>&#160;&#160;&#160;<input id="btnStatusComplex" value="Get Status" type="button" onclick="getStatusComplex()" disabled="disabled" />
-			<span class="header">AutoRefresh</span>
-			On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="javascript:convertToGetAndRelocate(this.value);" />
-			Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="javascript:convertToGetAndRelocate(this.value);" />
-			Interval&nbsp;<input id="autorefresh" type="text" value="15" size="2" />s
-		</p>
-		<p>
-		</p>
+    	<h1>ClusterControl</h1>
+		<div id="autorefreshtext" style="display: none;">
+			<span>AutoRefresh</span>
+			On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
+			Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
+		</div>
+    	<h2>JK Status</h2>
 		<table id="statustable" border="1" class="rowed grey" style="display: none;">
 			<thead>
 				<tr>
@@ -210,6 +207,18 @@
 				</tr>
 			</tbody>
 		</table>
+		<p>
+			Status: <span id="demoReply"></span>&#160;&#160;&#160;<input id="btnStatusComplex" value="Refresh" type="button" onclick="getStatusComplex()" disabled="disabled" title="Update Status table"/>
+		</p>
+		<fieldset>
+			<legend>Settings</legend>
+			<p>
+				<label>Target URL: <input type="text" id="hostname" size="50" /><input id="btnInitWithUrl" value="Initialize" type="button" onclick="initWithUrl()" /></label>
+			</p>
+			<p>
+				<label>Autorefresh Interval: <input id="autorefresh" type="text" value="15" size="2" />s</label>
+			</p>
+		</fieldset>
 		<br/>
 		<br/>	
 <!-- 

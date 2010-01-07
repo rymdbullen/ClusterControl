@@ -96,6 +96,11 @@ pre { background:#f4f4f4; padding:10px; }
 }
 
 .activator {
-	width:200px;
+	width:400px;
   	border:1px solid #ccc;
+}
+
+#autorefreshtext {
+	width:200px;
+  	float:right;
 }
