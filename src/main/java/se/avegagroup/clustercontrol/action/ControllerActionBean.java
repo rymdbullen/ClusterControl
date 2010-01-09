@@ -2,7 +2,6 @@ package se.avegagroup.clustercontrol.action;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
 import se.avegagroup.clustercontrol.domain.Host;
-import se.avegagroup.clustercontrol.domain.JkMember;
 import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
@@ -80,7 +78,7 @@ public class ControllerActionBean extends BaseActionBean {
 		return WorkerManager.disable(loadBalancer, worker);
 	}
 	/**
-	 * 
+	 * Activates a worker
 	 * @param loadBalancer
 	 * @param worker
 	 * @return
@@ -89,8 +87,9 @@ public class ControllerActionBean extends BaseActionBean {
 		return WorkerManager.activate(loadBalancer, worker);
 	}
 	/**
-	 * returns the balancers for a host
-	 * @return
+	 * Returns the jk statuses
+	 * @param host N/A
+	 * @return the jk statuses
 	 */
 	public static ArrayList<JkStatus> getStatusComplex(String host) {
 		return WorkerManager.statusComplex();
@@ -110,62 +109,5 @@ public class ControllerActionBean extends BaseActionBean {
 			}
 		}
 		return null;
-	}
-	/**
-	 * Initializes the application and returns 
-	 * @param url the initialization url
-	 * @return 
-	 * @throws MalformedURLException 
-	 */
-	public static String initWithUrl2(String url) throws MalformedURLException {
-		if(false==WorkerManager.isInitialized()) {
-			try {
-				WorkerManager.init(url);
-				return renderStatus();
-			} catch (WorkerNotFoundException e) {
-				logger.debug("Failed to locate worker for url: "+url);
-			}
-		}
-		return null;
-	}
-	public static String renderStatus() {
-//		HashMap<String, ArrayList<String>> workersPerHost = new HashMap<String, ArrayList<String>>(); 
-//		String renderedStatus = "";
-		ArrayList<JkStatus> jkStatuses = WorkerManager.statusComplex();
-		
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < jkStatuses.size(); i++) 
-		{
-			JkStatus jkStatus = jkStatuses.get(i);
-			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
-			
-			sb.append("<div class=\"container\">\n\t<span class=\"server\">"+jkStatus.getServer().getName()+"</span>\n");
-			for (int j = 0; j < members.size(); j++) 
-			{
-				JkMember member = members.get(j);
-				sb.append("\t<span class=\"worker\">"+member.getName()+"</span><span class=\"status"+member.getActivation()+"\">"+member.getActivation()+"</span>\n");
-				
-//				ArrayList<String> list = workersPerHost.get(workerName);
-//				if(list==null) {
-//					list = new ArrayList<String>();
-//					list.add(serverName);
-//					workersPerHost.put(workerName, list);
-//				} else {
-//					list.add(serverName);
-//				}
-			}
-			sb.append("</div>\n");
-		}
-//		System.out.println(""+sb.toString());
-//		Iterator<String> keysIter = workersPerHost.keySet().iterator();
-//		while (keysIter.hasNext()) {
-//			String workerName = (String) keysIter.next();		
-//			//StringBuilder sb1 = new StringBuilder();
-//			sb.append("<div class=\"name\">"+workerName+"</div>");
-//			
-//		}
-
-		return sb.toString();
 	}
 }

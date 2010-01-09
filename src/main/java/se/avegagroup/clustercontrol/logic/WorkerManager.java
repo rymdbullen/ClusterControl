@@ -368,7 +368,7 @@ public class WorkerManager {
 		JkStatus jkStatus = unmarshallResponse(workerResponse);
 		JkResult result = jkStatus.getResult();
 		if(result.getType().equals("NOK")) {
-			// TDDO implement StatusNOKException?
+			// TODO: implement StatusNOKException?
 			throw new WorkerNotFoundException();
 		}
 		return jkStatus;

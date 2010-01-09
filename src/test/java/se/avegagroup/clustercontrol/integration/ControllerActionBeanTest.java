@@ -33,7 +33,6 @@ public class ControllerActionBeanTest extends TestCase {
 			JkStatus jkStatus = (JkStatus) listIter.next();
 			System.out.println(jkStatus.getServer().getName());
 		}
-		ControllerActionBean.renderStatus();
 		assertEquals(2, balancerList.size());
 		assertEquals(2, WorkerManager.getHosts().size());
 	}

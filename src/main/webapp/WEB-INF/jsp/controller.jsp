@@ -49,30 +49,33 @@
 			dwr.util.useLoadingMessage();
 			JkController.isInitialized('workerName', renderInit);
     	}
-        function activate(workerName) 
+    	function goahead(action, workerName) {
+    		var answer = confirm ("Do you want to " + action + " " + workerName + "?")
+    		if (answer)
+    			return true; //alert ("Woo Hoo! So am I.")
+    		else
+    			return false; //alert ("Darn. Well, keep trying then.")
+    	}
+        function activate(eleid) 
         {
+        	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
+        	var workerName = eleid.substring(6);
+        	// do you want to activate this worker?
+        	if(!goahead("activate", workerName)) return;
+            
       	  	var loadBalancer = "lbfootprint";
       	  	JkController.activate(loadBalancer, workerName, renderStatus);
       	}
-        function disable(workerName) 
+        function disable(eleid)
         {
+        	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
+        	var workerName = eleid.substring(6);
+        	// do you want to activate this worker?
+        	if(!goahead("disable", workerName)) return;
+        	
       	  	var loadBalancer = "lbfootprint";
       		JkController.disable(loadBalancer, workerName, renderStatus);
       	}
-        function enableControls() 
-        {
-        	toggleControls(false);
-        }
-        function disableControls() 
-        {
-        	toggleControls(true);
-        }
-        function toggleControls(enableDisable) 
-        {
-        	$("btnStatusComplex").disabled = enableDisable;
-        	$("btnAct").disabled = enableDisable;
-        	$("btnDis").disabled = enableDisable;
-        }
         function renderInit(initStatus) 
         {
         	if(undefined == initStatus) {
@@ -81,7 +84,7 @@
 	        	return;
         	}
         	getStatusComplex();
-        	enableControls();
+        	//enableControls();
 	        dwr.util.setValue("demoReply", initStatus);
         }
         function getStatusComplex() 
@@ -98,27 +101,6 @@
       	  		errorHandler:function(message) { alert("Oops: Could not initialize: "+ url + " : " + message); }		
       	  	});
       	}
-        function disableClicked(eleid) 
-        {
-        	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	var workerName = eleid.substring(6);
-        	disable(workerName);
-        }
-        function showActivationPanel(eleid) 
-        {
-        	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	//var workerName = eleid.substring(6);
-        	//activate(workerName);
-        	$("activation" + thisId).style.display = "block";
-        }
-        function activateClicked(eleid) 
-        {
-        	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	var workerName = eleid.substring(6);
-        	// do you want to activate this worker?
-        	
-        	activate(workerName);
-        }
         function renderStatus(jkStatuses) 
         {
             // enable table and controls
@@ -174,7 +156,6 @@
 	              	$("cpcolumnWorker" + thisId).style.display = "table-cell";
 	        	}
 	        }
-        	enableControls();
         }
         //
         // runs at body onload
@@ -202,7 +183,7 @@
 				<tr id="controlpattern">
 					<td id="columnHost">Controls</td>
 					<td id="cpcolumnWorker" style="display: none;">
-						<input id="btnDis" type="button" value="Disable" onclick="disableClicked(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activateClicked(this.id)" disabled="disabled" />
+						<input id="btnDis" type="button" value="Disable" onclick="disable(this.id)" disabled="disabled" /> <input id="btnAct" type="button" value="Activate" onclick="activate(this.id)" disabled="disabled" />
 					</td>
 				</tr>
 			</tbody>
@@ -210,6 +191,18 @@
 		<p>
 			Status: <span id="demoReply"></span>&#160;&#160;&#160;<input id="btnStatusComplex" value="Refresh" type="button" onclick="getStatusComplex()" disabled="disabled" title="Update Status table"/>
 		</p>
+		<fieldset>
+			<legend>Actions</legend>
+			<p>
+				<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="javascript:setEnableRate('enable', this.value);" />(S)low
+				                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="javascript:setEnableRate('enable', this.value);" />(M)edium
+				                 <input type="radio" name="enablerate" value="agressive" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />(A)gressive
+				</label>
+			</p>
+			<p>
+				<label>Disable: <input id="autorefresh" type="text" value="15" size="2" />s</label>
+			</p>
+		</fieldset>
 		<fieldset>
 			<legend>Settings</legend>
 			<p>
