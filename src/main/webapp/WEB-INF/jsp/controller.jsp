@@ -200,7 +200,8 @@
 				</label>
 			</p>
 			<p>
-				<label>Disable: <input id="autorefresh" type="text" value="15" size="2" />s</label>
+				<label>Disable: <input type="radio" name="enablerate" value="agressive" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />
+				<br/><input id="btnInitiate" value="Initiate" type="button" onclick="initiate(this.id)" disabled="disabled" title="Initiate Activation/Deactivation"/></label>
 			</p>
 		</fieldset>
 		<fieldset>
@@ -213,69 +214,23 @@
 			</p>
 		</fieldset>
 		<br/>
-		<br/>	
-<!-- 
-		<div id="activationpanel">
-			<span class="jkcontrollerheader">Activation Intervals</span>
-			<div class="activator" id="slow">
-				<input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="javascript:setEnableRate('enable', this.value);" />(S)low
-			<div class="worker">
-			<input type="text" name="enableRateSlow0" value="10" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateSlow1" value="90" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateSlow2" value="60" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateSlow3" value="60" size="2" maxlength="2" class="enableRate" disabled />
-			</div>
-			</div>
-			<div class="activator" id="medium">
-				<input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="javascript:setEnableRate('enable', this.value);" />(M)edium
-			<div class="worker">
-			<input type="text" name="enableRateMedium0" value="10" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateMedium1" value="25" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateMedium2" value="20" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateMedium3" value="20" size="2" maxlength="2" class="enableRate" disabled />
-			</div>
-			</div>
-			<div class="activator" id="fast">
-				<input type="radio" name="enablerate" value="agressive" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />(A)gressive
-			<div class="worker">
-			<input type="text" name="enableRateAgressive0" value="10" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateAgressive1" value="25" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateAgressive2" value="20" size="2" maxlength="2" class="enableRate" disabled />
-			<input type="text" name="enableRateAgressive3" value="20" size="2" maxlength="2" class="enableRate" disabled />
-			</div>
-			</div>
-			<div class="activator" id="custom">
-				<input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="javascript:setEnableRate('enable', this.value);" />(C)ustom
-			<div class="worker">
-			<input type="text" name="enableRateCustom0" value="10" size="2" maxlength="2" class="enableRate" />
-			<input type="text" name="enableRateCustom1" value="25" size="2" maxlength="2" class="enableRate" />
-			<input type="text" name="enableRateCustom2" value="20" size="2" maxlength="2" class="enableRate" />
-			<input type="text" name="enableRateCustom3" value="20" size="2" maxlength="2" class="enableRate" />
-			</div>
-			</div>
-			<div class="activator" id="disable">
-				<input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="javascript:setEnableRate('enable', this.value);" />(D)isable
-			<div class="worker">
-			<input type="text" name="disableInterval0" value="3" size="2" maxlength="2" disabled />
-			<input type="text" name="disableInterval1" value="3" size="2" maxlength="2" disabled />
-			<input type="text" name="disableInterval2" value="3" size="2" maxlength="2" disabled />
-			<input type="text" name="disableInterval3" value="3" size="2" maxlength="2" disabled />
-			</div>
-			</div>
-		</div>-->	<!-- end workers -->
 		<br/>
 		<br/>
 		<h3>TODO</h3>
 		<ul>
-			<li>1. Quartz or javascript timer, how to push...</li>
-			<li>3. Ask tomcat manager for contexts</li>
-			<li>Show current sessions, etc etc</li>
+			<li>Handle activation / deactivation, algorithm</li>
+			<li>Quartz or javascript timer, how to push...</li>
 			<li>Handle different jk versions</li>
 		</ul>
 		<h3>Done</h3>
 		<ul>
-			<li>2. Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
-			<li>4. Visual Enhancement</li>
+			<li>Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
+			<li>Visual Enhancements, ongoing</li>
+		</ul>
+		<h3>Deferred</h3>
+		<ul>
+			<li>Ask tomcat manager for contexts</li>
+			<li>Show current sessions, etc etc</li>
 		</ul>
 	</s:layout-component>
 </s:layout-render>
