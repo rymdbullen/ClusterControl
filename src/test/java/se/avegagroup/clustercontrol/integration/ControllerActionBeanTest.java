@@ -39,8 +39,7 @@ public class ControllerActionBeanTest extends TestCase {
 	public void testDisable() {
 		logger.debug("Running testDisable");
 		String worker = "footprint1";
-		String lb = "lbfootprint";
-		ArrayList<JkStatus> workerLists = ControllerActionBean.disable(lb, worker);
+		ArrayList<JkStatus> workerLists = ControllerActionBean.disable(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
 			JkStatus workerList = workerLists.get(i);
 			JkBalancer balancer = workerList.getBalancers().getBalancer();
@@ -56,8 +55,7 @@ public class ControllerActionBeanTest extends TestCase {
 	public void testActivate() {
 		logger.debug("Running testActivate");
 		String worker = "footprint1";
-		String lb = "lbfootprint";
-		ArrayList<JkStatus> workerLists = ControllerActionBean.activate(lb, worker);
+		ArrayList<JkStatus> workerLists = ControllerActionBean.activate(worker);
 		for (int i = 0; i < workerLists.size(); i++) {
 			JkStatus workerList = workerLists.get(i);
 			JkBalancer balancer = workerList.getBalancers().getBalancer();

@@ -10,7 +10,7 @@
 			location.reload(); 
 			timerID = setTimeout("refreshPeriodic()", interval*1000); 
 		}
-		function convertToGetAndRelocate(actionValue) 
+		function convertToGetAndRelocate( actionValue ) 
 		{
 			if(actionValue=="off") {
 				window.location.replace(window.location.protocol + '//' +window.location.host + window.location.pathname);
@@ -23,6 +23,18 @@
 			interval = dwr.util.getValue("autorefresh");
 			url = url + '?autorefresh=' + dwr.util.getValue("autorefresh");
 			window.location.replace(url);
+		}
+		function initiate( actionValue ) 
+		{
+			if(actionValue=="disable") {
+				$("btnInitiate").disabled = false;
+				if(!goahead("disable all", "workers")) return;
+				JkController.disableAll(actionValue, renderStatus);
+			} else if(actionValue=="slow" || actionValue=="medium" || actionValue=="aggressive") {
+				$("btnInitiate").disabled = false;
+				if(!goahead("activate all", "workers")) return;
+				JkController.activateAll(actionValue, renderStatus);
+			}
 		}
 		function gup( name )
 		{
@@ -49,12 +61,13 @@
 			dwr.util.useLoadingMessage();
 			JkController.isInitialized('workerName', renderInit);
     	}
-    	function goahead(action, workerName) {
+    	function goahead(action, workerName) 
+    	{
     		var answer = confirm ("Do you want to " + action + " " + workerName + "?")
-    		if (answer)
-    			return true; //alert ("Woo Hoo! So am I.")
-    		else
-    			return false; //alert ("Darn. Well, keep trying then.")
+    		if (answer) {
+    			return true;
+    		}
+    		return false;
     	}
         function activate(eleid) 
         {
@@ -63,8 +76,7 @@
         	// do you want to activate this worker?
         	if(!goahead("activate", workerName)) return;
             
-      	  	var loadBalancer = "lbfootprint";
-      	  	JkController.activate(loadBalancer, workerName, renderStatus);
+      	  	JkController.activate(workerName, renderStatus);
       	}
         function disable(eleid)
         {
@@ -73,18 +85,15 @@
         	// do you want to activate this worker?
         	if(!goahead("disable", workerName)) return;
         	
-      	  	var loadBalancer = "lbfootprint";
-      		JkController.disable(loadBalancer, workerName, renderStatus);
+      		JkController.disable(workerName, renderStatus);
       	}
         function renderInit(initStatus) 
         {
         	if(undefined == initStatus) {
 	        	dwr.util.setValue("demoReply", "not initialized");
-	        	disableControls();
 	        	return;
         	}
         	getStatusComplex();
-        	//enableControls();
 	        dwr.util.setValue("demoReply", initStatus);
         }
         function getStatusComplex() 
@@ -161,12 +170,12 @@
         // runs at body onload
         window.onload=atload;
     --></script>
-    	<h1>ClusterControl</h1>
 		<div id="autorefreshtext" style="display: none;">
 			<span>AutoRefresh</span>
 			On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
 			Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
 		</div>
+    	<h1>ClusterControl</h1>
     	<h2>JK Status</h2>
 		<table id="statustable" border="1" class="rowed grey" style="display: none;">
 			<thead>
@@ -194,14 +203,11 @@
 		<fieldset>
 			<legend>Actions</legend>
 			<p>
-				<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="javascript:setEnableRate('enable', this.value);" />(S)low
-				                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="javascript:setEnableRate('enable', this.value);" />(M)edium
-				                 <input type="radio" name="enablerate" value="agressive" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />(A)gressive
-				</label>
-			</p>
-			<p>
-				<label>Disable: <input type="radio" name="enablerate" value="agressive" title="Fast Activation" onclick="javascript:setEnableRate('enable', this.value);" />
-				<br/><input id="btnInitiate" value="Initiate" type="button" onclick="initiate(this.id)" disabled="disabled" title="Initiate Activation/Deactivation"/></label>
+				<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="initiate(this.value)" />(S)low
+				                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="initiate(this.value)" />(M)edium
+				                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onclick="initiate(this.value)" />(A)ggressive
+								&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Deactivate" onclick="initiate(this.value)" />
+								<input id="btnInitiate" value="Initiate" type="button" onclick="initiate(this.value)" disabled="disabled" title="Initiate Activation/Deactivation"/></label>
 			</p>
 		</fieldset>
 		<fieldset>

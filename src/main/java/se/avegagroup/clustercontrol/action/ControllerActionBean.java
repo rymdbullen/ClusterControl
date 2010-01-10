@@ -70,21 +70,36 @@ public class ControllerActionBean extends BaseActionBean {
 	}
 	/**
 	 * Disables a worker
-	 * @param loadBalancer
-	 * @param worker
+	 * @param worker the worker to disable
 	 * @return
 	 */
-	public static ArrayList<JkStatus> disable(String loadBalancer, String worker) {
-		return WorkerManager.disable(loadBalancer, worker);
+	public static ArrayList<JkStatus> disable(String worker) {
+		return WorkerManager.disable(worker);
 	}
 	/**
 	 * Activates a worker
 	 * @param loadBalancer
-	 * @param worker
+	 * @param worker the worker to activate
 	 * @return
 	 */
-	public static ArrayList<JkStatus> activate(String loadBalancer, String worker) {
-		return WorkerManager.activate(loadBalancer, worker);
+	public static ArrayList<JkStatus> activate(String worker) {
+		return WorkerManager.activate(worker);
+	}
+	/**
+	 * Disables all workers
+	 * @param rate the rate to disable workers
+	 * @return
+	 */
+	public static ArrayList<JkStatus> disableAll(String rate) {
+		return WorkerManager.disableAll(rate);
+	}
+	/**
+	 * Activates all workers
+	 * @param rate the rate of the workers activation
+	 * @return
+	 */
+	public static ArrayList<JkStatus> activateAll(String rate) {
+		return WorkerManager.activateAll(rate);
 	}
 	/**
 	 * Returns the jk statuses
