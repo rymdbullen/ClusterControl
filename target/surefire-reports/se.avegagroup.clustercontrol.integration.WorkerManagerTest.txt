@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: se.avegagroup.clustercontrol.integration.WorkerManagerTest
--------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.752 sec
