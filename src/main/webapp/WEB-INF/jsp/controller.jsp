@@ -27,12 +27,10 @@
 		function initiate( actionValue ) 
 		{
 			if(actionValue=="disable") {
-				$("btnInitiate").disabled = false;
-				if(!goahead("disable all", "workers")) return;
+				if(!confirmAction("disable all", "workers")) return;
 				JkController.disableAll(actionValue, renderStatus);
 			} else if(actionValue=="slow" || actionValue=="medium" || actionValue=="aggressive") {
-				$("btnInitiate").disabled = false;
-				if(!goahead("activate all", "workers")) return;
+				if(!confirmAction("activate all", "workers")) return;
 				JkController.activateAll(actionValue, renderStatus);
 			}
 		}
@@ -61,7 +59,7 @@
 			dwr.util.useLoadingMessage();
 			JkController.isInitialized('workerName', renderInit);
     	}
-    	function goahead(action, workerName) 
+    	function confirmAction(action, workerName) 
     	{
     		var answer = confirm ("Do you want to " + action + " " + workerName + "?")
     		if (answer) {
@@ -74,7 +72,7 @@
         	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
         	var workerName = eleid.substring(6);
         	// do you want to activate this worker?
-        	if(!goahead("activate", workerName)) return;
+        	if(!confirmAction("activate", workerName)) return;
             
       	  	JkController.activate(workerName, renderStatus);
       	}
@@ -83,7 +81,7 @@
         	// we were an id of the form "edit{id}", eg "edit42". We lookup the "42"
         	var workerName = eleid.substring(6);
         	// do you want to activate this worker?
-        	if(!goahead("disable", workerName)) return;
+        	if(!confirmAction("disable", workerName)) return;
         	
       		JkController.disable(workerName, renderStatus);
       	}
@@ -206,8 +204,9 @@
 				<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="initiate(this.value)" />(S)low
 				                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="initiate(this.value)" />(M)edium
 				                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onclick="initiate(this.value)" />(A)ggressive
+				                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="initiate(this.value)" />(C)ustom
 								&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Deactivate" onclick="initiate(this.value)" />
-								<input id="btnInitiate" value="Initiate" type="button" onclick="initiate(this.value)" disabled="disabled" title="Initiate Activation/Deactivation"/></label>
+								<!-- input id="btnInitiate" value="Initiate" type="button" onclick="initiate(this.value)" disabled="disabled" title="Initiate Activation/Deactivation"/ --></label>
 			</p>
 		</fieldset>
 		<fieldset>
@@ -225,13 +224,15 @@
 		<h3>TODO</h3>
 		<ul>
 			<li>Handle activation / deactivation, algorithm</li>
-			<li>Quartz or javascript timer, how to push...</li>
-			<li>Handle different jk versions</li>
+			<li>Task: Quartz or javascript timer, how to push...</li>
+			<li>Task: Handle different jk versions</li>
+			<li>Bug: failure to write heading for one host</li>
+			<li>Visual Enhancements, ongoing</li>
 		</ul>
 		<h3>Done</h3>
 		<ul>
 			<li>Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
-			<li>Visual Enhancements, ongoing</li>
+			<li>Autorefresh</li>
 		</ul>
 		<h3>Deferred</h3>
 		<ul>

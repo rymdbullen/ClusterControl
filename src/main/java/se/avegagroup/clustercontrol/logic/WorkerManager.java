@@ -248,7 +248,7 @@ public class WorkerManager {
 	 * @param rate the rate to activate workers
 	 * @return list of statuses
 	 */
-	public static ArrayList<JkStatus> activateAll(String rate) {
+	public static ArrayList<JkStatus> activateAll(String rate) {		
 		//
 		// logic to handle activation
 		for (int workersIdx = 0; workersIdx < _workerNames.length; workersIdx++) {
@@ -261,10 +261,65 @@ public class WorkerManager {
 			WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, activateParameters + "&" + xmlMimeParameters);
 
 			parseStatusAndPause(workerResponses, worker);
+
+			waitLogic(workersIdx, _workerNames.length, rate);
 		}
 		return statusComplex();
+	}	
+	/**
+	 * Logic for getting an interval
+	 * @param workersIdx
+	 * @param length
+	 * @param rate
+	 */
+	private static void waitLogic(int workersIdx, int length, String rate) {
+		// weight
+		// idx * 
+		double defaultTime = 90.0d;
+		int[] degrees;
+		int[] degreesSlow = new int[] {90, 155};
+		int[] degreesMedium = new int[] {125, 145};
+		int[] degreesAggressive = new int[] {155, 165};
+		
+		if(rate.equals("slow")) {
+			degrees = degreesSlow;
+		} else if(rate.equals("medium")) {
+			degrees = degreesMedium;
+		} else if(rate.equals("aggressive")) {
+			degrees = degreesAggressive;
+		} else {
+			degrees = degreesSlow;
+		}
+		long delay;
+		double angle;
+		if(workersIdx==0) {
+			int weight = degrees[0];
+			angle = weight * 2.0 * Math.PI/360.0;
+			System.out.println("["+workersIdx+"] "+weight+": "+ Math.round(Math.sin(angle)*defaultTime));
+		} else if(workersIdx==1) {
+			int weight = degrees[1];
+			angle = weight * 2.0 * Math.PI/360.0;
+			System.out.println("["+workersIdx+"] "+weight+": "+Math.round(Math.sin(angle)*defaultTime));
+		} else {
+			int weight = degrees[2];
+			angle = weight * 2.0 * Math.PI/360.0;
+			System.out.println("["+workersIdx+"] "+weight+": "+Math.round(Math.sin(angle)*defaultTime));
+		}
+		delay = Math.round(Math.sin(angle)*defaultTime);
+		//
+		// wait for x seconds
+		try {
+			long millis = delay*1000;
+			logger.info("Sleeping "+millis+"ms");
+			// Sleep for 3 seconds
+			Thread.sleep(millis);
+		} catch (Exception e) {
+			if(logger.isDebugEnabled()) {
+				logger.debug("Error when suspending thread: "+e.getMessage());
+			}
+		}		
+		
 	}
-
 	/**
 	 * Disables the worker for the initialized loadbalancer and returns the list of balancers
 	 * @param loadBalancer the loadbalancer
@@ -298,7 +353,7 @@ public class WorkerManager {
 	 */
 	public static ArrayList<JkStatus> disableAll(String rate) {
 		//
-		// logic to handle activation
+		// logic to handle disabling
 		for (int workersIdx = 0; workersIdx < _workerNames.length; workersIdx++) {
 			String worker = _workerNames[workersIdx];
 			//
@@ -319,7 +374,7 @@ public class WorkerManager {
 	 */
 	private static void parseStatusAndPause(WorkerResponses workerResponses, String worker) {
 		//
-		// process the disable action responses
+		// process the action responses
 		int hostsCount = workerResponses.getResponseList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
 			WorkerResponse workerResponse = workerResponses.getResponseList().get(hostIdx);
@@ -336,10 +391,11 @@ public class WorkerManager {
 		//
 		// wait for x seconds
 		try {
-			logger.info("Sleeping");
+			int millis = 3000;
+			logger.info("Post Action: Sleeping "+millis+"ms");
+			//
 			// Sleep for 3 seconds
-			// Thread.sleep() must be within a try - catch block
-			Thread.sleep(3000);
+			Thread.sleep(millis);
 		} catch (Exception e) {
 			if(logger.isDebugEnabled()) {
 				logger.debug("Error when suspending thread: "+e.getMessage());
