@@ -4,3 +4,4 @@
 target/*
 api/
 /target/*
+/target
