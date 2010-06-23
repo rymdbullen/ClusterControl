@@ -5,7 +5,7 @@ import net.sourceforge.stripes.action.ForwardResolution;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
-@UrlBinding("/Home.htm")
+@UrlBinding("/home.htm")
 public class HomeActionBean extends BaseActionBean {
 
 	@DefaultHandler

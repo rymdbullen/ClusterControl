@@ -16,19 +16,26 @@ import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
 
-@UrlBinding("/Controller.htm")
+@UrlBinding("/controller.html")
 public class ControllerActionBean extends BaseActionBean {
 
 	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
 
+	private static String initializedUrl;
+	
 	/**
 	 * 
 	 * @return
 	 */
-	@DefaultHandler
+	//@DefaultHandler
 	public Resolution view() {
-		return new ForwardResolution("/WEB-INF/jsp/controller.jsp");
+		return new ForwardResolution("/WEB-INF/jsp/page/controller.jsp");
 	}
+
+	public String getInitializedUrl() {
+		return initializedUrl;
+	}
+	
 	/**
 	 * Returns a text if initialized, null if not 
 	 * @param worker N/A
@@ -118,7 +125,11 @@ public class ControllerActionBean extends BaseActionBean {
 	public static ArrayList<JkStatus> initWithUrl(String initUrl) throws MalformedURLException {
 		if(false==WorkerManager.isInitialized()) {
 			try {
-				return WorkerManager.init(initUrl);
+				ArrayList<JkStatus> statuses = WorkerManager.init(initUrl);
+				if(statuses!=null && statuses.size()>0) { 
+					initializedUrl = initUrl;
+				}
+				return statuses;
 			} catch (WorkerNotFoundException e) {
 				logger.debug("Failed to locate worker for url: "+initUrl);
 			}

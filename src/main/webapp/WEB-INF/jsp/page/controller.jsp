@@ -1,7 +1,7 @@
 <%@ include file="/WEB-INF/jsp/taglibs.jsp"%>
 
-<s:layout-render name="/WEB-INF/jsp/layout.jsp" title="ClusterControl">
-	<s:layout-component name="body">
+<stripes:layout-render name="/WEB-INF/jsp/layout/layout.jsp" title="ClusterControl">
+	<stripes:layout-component name="body">
 		<script type="text/javascript"><!--
 		var interval = gup("autorefresh");
 		function refreshPeriodic() 
@@ -30,7 +30,7 @@
 				if(!confirmAction("disable all", "workers")) return;
 				JkController.disableAll(actionValue, renderStatus);
 			} else if(actionValue=="slow" || actionValue=="medium" || actionValue=="aggressive") {
-				if(!confirmAction("activate all", "workers")) return;
+				if(!confirmAction(actionValue + " activate all", "workers")) return;
 				JkController.activateAll(actionValue, renderStatus);
 			}
 		}
@@ -48,13 +48,15 @@
     	function atload() 
     	{
 			var url = window.location.search;
+        	var ctrlautorefresh = document.getElementById('ctrlautorefresh');
+//alert('hej: '+ctrlautorefresh.size+' '+ctrlautorefresh.checked);
 			if(url.indexOf('autorefresh')>-1) {
-            	timerID = setTimeout("refreshPeriodic()", interval*1000); 
-				ctrlautorefresh[0].checked = true;
-				ctrlautorefresh[1].checked = false;
+            	timerID = setTimeout("refreshPeriodic()", interval*1000);
+            	//ctrlautorefresh[0].checked = true;
+				//ctrlautorefresh[1].checked = false;
 			} else {
-				ctrlautorefresh[0].checked = false;
-				ctrlautorefresh[1].checked = true;
+				//ctrlautorefresh[0].checked = false;
+				//ctrlautorefresh[1].checked = true;
 			}
 			dwr.util.useLoadingMessage();
 			JkController.isInitialized('workerName', renderInit);
@@ -212,32 +214,11 @@
 		<fieldset>
 			<legend>Settings</legend>
 			<p>
-				<label>Target URL: <input type="text" id="hostname" size="50" /><input id="btnInitWithUrl" value="Initialize" type="button" onclick="initWithUrl()" /></label>
+				<label>Target URL: <input type="text" id="hostname" size="50" value="${actionBean.initializedUrl}" /><input id="btnInitWithUrl" value="Initialize" type="button" onclick="initWithUrl()" /></label>
 			</p>
 			<p>
 				<label>Autorefresh Interval: <input id="autorefresh" type="text" value="15" size="2" />s</label>
 			</p>
 		</fieldset>
-		<br/>
-		<br/>
-		<br/>
-		<h3>TODO</h3>
-		<ul>
-			<li>Handle activation / deactivation, algorithm</li>
-			<li>Task: Quartz or javascript timer, how to push...</li>
-			<li>Task: Handle different jk versions</li>
-			<li>Bug: failure to write heading for one host</li>
-			<li>Visual Enhancements, ongoing</li>
-		</ul>
-		<h3>Done</h3>
-		<ul>
-			<li>Handle more than one host: backend (Done) and frontend (ongoing), ie tables</li>
-			<li>Autorefresh</li>
-		</ul>
-		<h3>Deferred</h3>
-		<ul>
-			<li>Ask tomcat manager for contexts</li>
-			<li>Show current sessions, etc etc</li>
-		</ul>
-	</s:layout-component>
-</s:layout-render>
+	</stripes:layout-component>
+</stripes:layout-render>
