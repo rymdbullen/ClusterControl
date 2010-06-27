@@ -3,7 +3,7 @@ package se.avegagroup.clustercontrol.action;
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 
-public class BaseActionBean implements ActionBean {
+public class BaseAction implements ActionBean {
 
 	private ActionBeanContext context;
 

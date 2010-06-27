@@ -17,9 +17,9 @@ import se.avegagroup.clustercontrol.logic.WorkerManager;
 import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
 
 @UrlBinding("/controller.html")
-public class ControllerActionBean extends BaseActionBean {
+public class ControllerAction extends BaseAction {
 
-	private static final Logger logger = LoggerFactory.getLogger(ControllerActionBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(ControllerAction.class);
 
 	private static String initializedUrl;
 	
@@ -27,7 +27,7 @@ public class ControllerActionBean extends BaseActionBean {
 	 * 
 	 * @return
 	 */
-	//@DefaultHandler
+	@DefaultHandler
 	public Resolution view() {
 		return new ForwardResolution("/WEB-INF/jsp/page/controller.jsp");
 	}

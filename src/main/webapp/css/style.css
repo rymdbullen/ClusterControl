@@ -20,8 +20,9 @@ a, a:visited {
   color: #0000FF;
 }
 
-body { margin:60px 40px 0px 40px; color:#666; line-height:1.3em;
-  font-family:'Century Gothic', Helvetica, Arial, clean, sans-serif;
+body { 
+	margin:30px 20px 0px 30px; color:#666; line-height:1.3em;
+	font-family:'Century Gothic', Helvetica, Arial, clean, sans-serif;
 }
 
 select, textarea, input[type='text'], input[type='password'] {
@@ -74,7 +75,8 @@ pre { background:#f4f4f4; padding:10px; }
   width:200px; text-align:right; padding-top:2px;
 }
 
-#page-title { background-color:#7272a2; border:1px solid #000000;
+#page-title { 
+	background-color:#7272a2; border:1px solid #000000;
   border-top:0; padding:5px; font-size:80%; line-height:1.8em;
   position:absolute; top:0; left:0; width:100%; color:#ccc;
 }
@@ -82,7 +84,8 @@ pre { background:#f4f4f4; padding:10px; }
 #page-title a:hover { background-color:#7272a2; color:#ff3; }
 #page-title a:active { color:#fc6; }
 
-#dwr-debug {  white-space:nowrap; font-size:70%; border:1px solid #AAA;
+#dwr-debug {  
+	white-space:nowrap; font-size:70%; border:1px solid #AAA;
   font-family:anonymous,courier,monospace; background:#EEE; padding: 5px;
   margin:20px 0px;
 }

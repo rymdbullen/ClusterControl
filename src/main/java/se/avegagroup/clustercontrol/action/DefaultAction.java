@@ -7,13 +7,18 @@ import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.UrlBinding;
 
 @UrlBinding("/home.html")
-public class DefaultAction extends BaseActionBean {
+public class DefaultAction extends BaseAction {
+	private static String initializedUrl;
+	
+	public String getInitializedUrl() {
+		return initializedUrl;
+	}
 
 	@DefaultHandler
 	public Resolution view() {
-		if(WorkerManager.isInitialized()) {
+		//if(WorkerManager.isInitialized()) {
 			return new ForwardResolution("/WEB-INF/jsp/page/controller.jsp");
-		}
-		return new ForwardResolution("/WEB-INF/jsp/page/home.jsp");
+		//}
+		//return new ForwardResolution("/WEB-INF/jsp/page/home.jsp");
 	}
 }

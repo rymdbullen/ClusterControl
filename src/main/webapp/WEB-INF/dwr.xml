@@ -4,7 +4,7 @@
 <dwr>
   <allow>
     <create creator="new" javascript="JkController" scope="script">
-      <param name="class" value="se.avegagroup.clustercontrol.action.ControllerActionBean"/>
+      <param name="class" value="se.avegagroup.clustercontrol.action.ControllerAction"/>
     </create>
 	<convert match="se.avegagroup.clustercontrol.domain.JkResult" converter="bean"/>
 	<convert match="se.avegagroup.clustercontrol.domain.JkAjpWorkers" converter="bean"/>

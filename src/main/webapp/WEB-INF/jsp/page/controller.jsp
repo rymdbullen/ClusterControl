@@ -175,8 +175,6 @@
 			On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
 			Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
 		</div>
-    	<h1>ClusterControl</h1>
-    	<h2>JK Status</h2>
 		<table id="statustable" border="1" class="rowed grey" style="display: none;">
 			<thead>
 				<tr>
