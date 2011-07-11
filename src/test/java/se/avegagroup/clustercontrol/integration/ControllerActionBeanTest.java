@@ -86,6 +86,8 @@ public class ControllerActionBeanTest extends TestCase {
 //		}		
 //	}
 
+	// Consider using rmock or mockit
+	
 	public void testInitWithUrl() throws MalformedURLException {
 		WorkerManager.reset();
 		logger.debug("Running tests against: "+Constants.TEST_URL);
