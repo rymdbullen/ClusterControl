@@ -18,7 +18,7 @@ import se.avegagroup.clustercontrol.domain.JkStatus;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.logic.WorkerManager;
-import se.avegagroup.clustercontrol.util.WorkerStatus;
+import se.avegagroup.clustercontrol.util.WorkerStatusXML;
 import junit.framework.TestCase;
 
 /**
@@ -37,7 +37,7 @@ public class WorkerStatusTest extends TestCase {
 		WorkerManager.init(Constants.TEST_URL);
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
+	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testGetStatusUnmarshall() {
 		
@@ -45,11 +45,11 @@ public class WorkerStatusTest extends TestCase {
 		
 		WorkerResponses workerResponses = WorkerManager.getStatus("xml");
 		
-		WorkerStatus workerStatus = new WorkerStatus();
 		int hostsCount = workerResponses.getResponseList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
 			WorkerResponse workerResponse = workerResponses.getResponseList().get(hostIdx);
-			JkStatus jkStatus = workerStatus.unmarshall(workerResponse.getBody());
+			WorkerStatusXML workerStatus = new WorkerStatusXML(workerResponse.getBody());
+			JkStatus jkStatus = workerStatus.getStatus();
 			assertNotNull(jkStatus);
 			assertEquals(new Integer(1), jkStatus.getBalancers().getCount());
 			JkBalancers balancers =  jkStatus.getBalancers();
@@ -63,7 +63,7 @@ public class WorkerStatusTest extends TestCase {
 		}
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
+	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testActivateUnmarshall() {
 		logger.debug("Running testActivateUnmarshall");
@@ -82,7 +82,7 @@ public class WorkerStatusTest extends TestCase {
 		}
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatus#unmarshall(java.lang.String)}.
+	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testDisableUnmarshall() {
 		logger.debug("Running testDisableUnmarshall");
