@@ -8,15 +8,18 @@ public class StringUtil extends net.sourceforge.stripes.util.StringUtil {
 
 	public static String getDisableParameters(String loadBalancer, String worker) {
 		String parameters = addUpdateParameters(loadBalancer, worker, WORKER_DISABLE);
-		return parameters;
+		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
+		return parameters + "&" + xmlMimeParameters;
 	}
 	public static String getStopParameters(String loadBalancer, String worker) {
 		String parameters = addUpdateParameters(loadBalancer, worker, WORKER_STOP);
-		return parameters;
+		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
+		return parameters + "&" + xmlMimeParameters;
 	}
 	public static String getActivateParameters(String loadBalancer, String worker) {
 		String parameters = addUpdateParameters(loadBalancer, worker, WORKER_ACTIVATE);
-		return parameters;
+		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
+		return parameters + "&" + xmlMimeParameters;
 	}
 	/**
 	 * Adds update parameters to 

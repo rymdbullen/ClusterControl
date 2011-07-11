@@ -20,8 +20,6 @@ import se.avegagroup.clustercontrol.logic.WorkerNotFoundException;
 public class ControllerAction extends BaseAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(ControllerAction.class);
-
-	private static String initializedUrl;
 	
 	/**
 	 * 
@@ -33,7 +31,7 @@ public class ControllerAction extends BaseAction {
 	}
 
 	public String getInitializedUrl() {
-		return initializedUrl;
+		return WorkerManager.getInitUrl();
 	}
 	
 	/**
@@ -120,19 +118,19 @@ public class ControllerAction extends BaseAction {
 	 * Initializes the application and returns an array of jk status 
 	 * @param initUrl the initialization url
 	 * @return an array of jk status
-	 * @throws MalformedURLException 
 	 */
-	public static ArrayList<JkStatus> initWithUrl(String initUrl) throws MalformedURLException {
-		if(false==WorkerManager.isInitialized()) {
-			try {
-				ArrayList<JkStatus> statuses = WorkerManager.init(initUrl);
-				if(statuses!=null && statuses.size()>0) { 
-					initializedUrl = initUrl;
-				}
-				return statuses;
-			} catch (WorkerNotFoundException e) {
-				logger.debug("Failed to locate worker for url: "+initUrl);
-			}
+	public static ArrayList<JkStatus> initWithUrl(String initUrl) {
+		if(WorkerManager.isInitialized()) {
+			return null;
+		}
+		try {
+			return WorkerManager.init(initUrl);
+		} catch (WorkerNotFoundException e) {
+			logger.debug("Worker not found for url: "+initUrl);
+			//TODO update error object
+		} catch (MalformedURLException e) {
+			logger.debug("Malformed url: "+initUrl);
+			//TODO update error object
 		}
 		return null;
 	}

@@ -19,8 +19,9 @@ import se.avegagroup.clustercontrol.domain.JkResult;
 import se.avegagroup.clustercontrol.domain.WorkerResponse;
 import se.avegagroup.clustercontrol.domain.WorkerResponses;
 import se.avegagroup.clustercontrol.http.HttpClient;
+import se.avegagroup.clustercontrol.util.IWorkerStatus;
 import se.avegagroup.clustercontrol.util.StringUtil;
-import se.avegagroup.clustercontrol.util.WorkerStatus;
+import se.avegagroup.clustercontrol.util.WorkerStatusXML;
 
 public class WorkerManager {
 
@@ -38,6 +39,7 @@ public class WorkerManager {
 	private static String _initUrl;
 	private static String[] _workerNames;
 	private static Calendar _lastUpdated;
+	private static ArrayList<JkStatus> _currentStatus = new ArrayList<JkStatus>();
 	
 	/**
 	 * Initializes the WorkerManager with a url. 
@@ -53,7 +55,7 @@ public class WorkerManager {
 		//
 		// if no members return null
 		HashSet<String> addressSet = null;
-		JkStatus jkStatus = unmarshallResponse(getWorkerResponse(url));
+		JkStatus jkStatus = unmarshalResponse(getWorkerResponse(url));
 		if(jkStatus==null) {
 			return null;
 		}
@@ -73,7 +75,7 @@ public class WorkerManager {
 			_loadBalancer = jkStatus.getBalancers().getBalancer().getName();
 		}
 		
-		if(logger.isDebugEnabled()) { logger.debug("More than one unique host found. Trying to init {} hosts", addressSet.size()); }
+		if(logger.isDebugEnabled()) { logger.debug("More than one unique host found, initializes {} hosts", addressSet.size()); }
 		
 		Iterator<String> addressIterator = addressSet.iterator();
 		while (addressIterator.hasNext()) {
@@ -83,7 +85,7 @@ public class WorkerManager {
 				continue;
 			}
 			String newUrl = createUrlForIpaddress(ipaddress);
-			JkStatus newJkStatus = unmarshallResponse(getWorkerResponse(newUrl));
+			JkStatus newJkStatus = unmarshalResponse(getWorkerResponse(newUrl));
 			if(newJkStatus==null) {
 				continue;
 			}
@@ -96,8 +98,14 @@ public class WorkerManager {
 		}
 		_initUrl = url;
 		_workerNames = getWorkerNames(jkStatus);
+		_lastUpdated = Calendar.getInstance();
 		return statuses;
 	}
+	/**
+	 * Returns the worker names for the given status
+	 * @param jkStatus the status to get worker names for
+	 * @return the worker names for the given status
+	 */
 	private static String[] getWorkerNames(JkStatus jkStatus) {
 		int count =jkStatus.getBalancers().getBalancer().getMemberCount();
 		String[] retval = new String[count];
@@ -107,6 +115,12 @@ public class WorkerManager {
 		}
 		return retval;
 	}
+	/**
+	 * 
+	 * @param ipaddress
+	 * @return
+	 * @throws MalformedURLException
+	 */
 	private static String createUrlForIpaddress(String ipaddress) throws MalformedURLException {
 		URL newUrl = new URL(_protocol, ipaddress, _port, _context);
 		return newUrl.toExternalForm();
@@ -221,16 +235,21 @@ public class WorkerManager {
 	 * @param loadBalancer the loadbalancer
 	 * @param worker the worker to activate
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> activate(String loadBalancer, String worker) {
 		//
 		// Perform the activate action
 		logger.info("Activating worker: "+worker);
 		String activateParameters = StringUtil.getActivateParameters(loadBalancer, worker);
-		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
-		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, activateParameters + "&" + xmlMimeParameters);
+		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, activateParameters);
 
-		parseStatusAndPause(workerResponses, worker);
+		try {
+			parseStatusAndPause(workerResponses, worker);
+		} catch (ControlCommandException e) {
+			// set latest status message
+			
+		}
 
 		return statusComplex();
 	}
@@ -239,6 +258,7 @@ public class WorkerManager {
 	 * Activates the worker for the initialized loadbalancer and returns the list of balancers
 	 * @param worker the worker to activate
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> activate(String worker) {
 		return activate(_loadBalancer, worker);
@@ -247,6 +267,7 @@ public class WorkerManager {
 	 * Activates all the workers for the initialized loadbalancer and returns the list of balancers
 	 * @param rate the rate to activate workers
 	 * @return list of statuses
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> activateAll(String rate) {		
 		//
@@ -260,7 +281,11 @@ public class WorkerManager {
 			String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 			WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, activateParameters + "&" + xmlMimeParameters);
 
-			parseStatusAndPause(workerResponses, worker);
+			try {
+				parseStatusAndPause(workerResponses, worker);
+			} catch (ControlCommandException e) {
+				// set latest status message
+			}
 
 			waitLogic(workersIdx, _workerNames.length, rate);
 		}
@@ -325,6 +350,7 @@ public class WorkerManager {
 	 * @param loadBalancer the loadbalancer
 	 * @param worker the worker to disable
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> disable(String loadBalancer, String worker) {
 		//
@@ -334,7 +360,11 @@ public class WorkerManager {
 		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, disableParameters + "&" + xmlMimeParameters);
 
-		parseStatusAndPause(workerResponses, worker);
+		try {
+			parseStatusAndPause(workerResponses, worker);
+		} catch (ControlCommandException e) {
+			// set latest status message
+		}
 
 		return statusComplex();
 	}
@@ -342,6 +372,7 @@ public class WorkerManager {
 	 * Disables the worker for the initialized loadbalancer and returns the list of balancers
 	 * @param worker the worker to disable
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> disable(String worker) {
 		return disable(_loadBalancer, worker);
@@ -350,6 +381,7 @@ public class WorkerManager {
 	 * Disables all workers for the initialized loadbalancer and returns the list of balancers
 	 * @param rate the rate to disable workers
 	 * @return list of statuses
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> disableAll(String rate) {
 		//
@@ -363,28 +395,34 @@ public class WorkerManager {
 			String xmlMimeParameters = StringUtil.getMimeXmlParameters();
 			WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, disableParameters + "&" + xmlMimeParameters);
 
-			parseStatusAndPause(workerResponses, worker);
+			try {
+				parseStatusAndPause(workerResponses, worker);
+			} catch (ControlCommandException e) {
+				// set latest status message
+			}
 		}
 		return statusComplex();
 	}
 	/**
-	 * Parses the supplied workerResponses and 
+	 * Parses the supplied workerResponses and pause for a period
 	 * @param workerResponses the workerResponse, ie html bodys
 	 * @param worker the worker to get status for
+	 * @throws ControlCommandException 
 	 */
-	private static void parseStatusAndPause(WorkerResponses workerResponses, String worker) {
+	private static void parseStatusAndPause(WorkerResponses workerResponses, String worker) throws ControlCommandException {
 		//
 		// process the action responses
 		int hostsCount = workerResponses.getResponseList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
 			WorkerResponse workerResponse = workerResponses.getResponseList().get(hostIdx);
-			JkStatus status = unmarshallResponse(workerResponse); 
-			if(logger.isDebugEnabled()) {
-				if (status.getResult().getType().equals("OK")) {
+			JkStatus status = unmarshalResponse(workerResponse); 
+			if (status.getResult().getType().equals("OK")) {
+				if(logger.isDebugEnabled()) {
 					logger.debug("Worker: '" + worker + "' action OK!");
-				} else {
-					logger.debug("Worker: '" + worker + "' action NOK!");
 				}
+			} else {
+				logger.error("Worker: '" + worker + "' action NOK!");
+				throw new ControlCommandException("Worker: '" + worker + "' action failed");
 			}
 		}
 
@@ -407,23 +445,31 @@ public class WorkerManager {
 	 * @param workerResponse the response object to get status from
 	 * @return the status from supplied response object
 	 */
-	private static JkStatus unmarshallResponse(WorkerResponse workerResponse) {
-		WorkerStatus workerStatus = new WorkerStatus();
-		JkStatus jkStatus = workerStatus.unmarshall(workerResponse.getBody());
-		return jkStatus;
+	private static JkStatus unmarshalResponse(WorkerResponse workerResponse) {
+		return getWorkerStatus(workerResponse.getBody());
+		//IWorkerStatus workerStatus = new IWorkerStatus(workerResponse.getBody());
+		//return workerStatus.unmarshal(workerResponse.getBody());
+	}
+	private static JkStatus getWorkerStatus(String body) {
+		
+		return null;
 	}
 	/**
 	 * Stops the worker for the supplied loadbalancer and returns the list of balancers
 	 * @param loadBalancer the loadbalancer
 	 * @param worker the worker to stop
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static ArrayList<JkStatus> stop(String loadBalancer, String worker) {
 		String stopParameters = StringUtil.getStopParameters(loadBalancer, worker);
-		String xmlMimeParameters = StringUtil.getMimeXmlParameters();
-		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, stopParameters + "&" + xmlMimeParameters);
+		WorkerResponses workerResponses = HttpClient.executeUrls(_hosts, stopParameters);
 
-		parseStatusAndPause(workerResponses, worker);
+		try {
+			parseStatusAndPause(workerResponses, worker);
+		} catch (ControlCommandException e) {
+			//set latest status message
+		}
 
 		return statusComplex();
 	}
@@ -432,6 +478,7 @@ public class WorkerManager {
 	 * Stops the worker for the initialized loadbalancer and returns the list of balancers
 	 * @param worker the worker to stop
 	 * @return list of balancers
+	 * @throws ControlCommandException 
 	 */
 	public static List<JkStatus> stop(String worker) {
 		return stop(_loadBalancer, worker);
@@ -477,7 +524,7 @@ public class WorkerManager {
 	 * @throws WorkerNotFoundException 
 	 */
 	public static JkStatus statusComplex(WorkerResponse workerResponse) throws WorkerNotFoundException {
-		JkStatus jkStatus = unmarshallResponse(workerResponse);
+		JkStatus jkStatus = unmarshalResponse(workerResponse);
 		JkResult result = jkStatus.getResult();
 		if(result.getType().equals("NOK")) {
 			// TODO: implement StatusNOKException?
@@ -501,6 +548,7 @@ public class WorkerManager {
 		} else {
 			throw new IllegalArgumentException("Format is not valid: "+format);
 		}
+		_lastUpdated = Calendar.getInstance();
 		return HttpClient.executeUrls(_hosts, parameters);
 	}
 	/**
@@ -611,4 +659,25 @@ public class WorkerManager {
 		host.setContext(jkContext);
 		return host;
 	}
+	/**
+	 * Returns the current status of the workers.
+	 * @return the current status of the workers.
+	 */
+	public static ArrayList<JkStatus> getStatus() {
+		return _currentStatus;
+	}
+	/**
+	 * Returns the current initialized url.
+	 * @return the current initialized url.
+	 */
+	public static String getInitUrl() {
+		return _initUrl;
+	}	
+	/**
+	 * Returns the last update timestamp.
+	 * @return the last update timestamp.
+	 */
+	public static Calendar getLastUpdated() {
+		return _lastUpdated;
+	}	
 }
