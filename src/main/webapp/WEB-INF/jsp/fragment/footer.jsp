@@ -1,8 +1,17 @@
 <%@ include file="/WEB-INF/jsp/taglibs.jsp" %>
 <stripes:layout-definition>
+		<h3>THOUGHTS</h3>
+		<ul>
+			<li>first view: init url or directly to status page</li>
+			<li>second view: status page with controls</li>
+			<li>third view: control command sent, updates the rendered view</li>
+			<li>fourth view: asynch ajax updates the current already rendered view</li>
+			<li>Consider using rmock or mockit for offline builds</li>
+		</ul>
 		<h3>TODO</h3>
 		<ul>
-			<li>Handle activation / deactivation, algorithm</li>
+			<li>Error Handling, what if one worker doesn't answer</li>
+			<li>Handle activation / deactivation algorithm</li>
 			<li>Task: Quartz or javascript timer, how to push...</li>
 			<li>Task: Handle different jk versions</li>
 			<li>Bug: failure to write heading for one host</li>
