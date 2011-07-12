@@ -10,10 +10,11 @@
 	
 	<repositories>
 		<repository>
-			<id>java.net</id>
-			<url>http://download.java.net/maven/2</url>
-			<layout>legacy</layout>
-		</repository>
+          <id>maven2-repository.dev.java.net</id>
+          <name>Java.net Repository for Maven</name>
+          <url>http://download.java.net/maven/2/</url>
+          <layout>default</layout>
+        </repository>
 		<repository>
 			<id>Version99</id>
 			<name>Version 99 Does Not Exist Maven repository</name>
@@ -28,12 +29,6 @@
 			<name>Java.net Maven 2 Repository</name>
 			<url>http://download.java.net/maven/2</url>
 		</pluginRepository>
-		<pluginRepository>
-			<id>maven-repository.dev.java.net</id>
-			<name>Java.net Maven 1 Repository (legacy)</name>
-			<url>http://download.java.net/maven/1</url>
-			<layout>legacy</layout>
-		</pluginRepository>
 	</pluginRepositories>
 	
 	<build>
@@ -41,6 +36,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -109,7 +105,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<!--  version>3.0-beta-1-SNAPSHOT</version -->
+				<version>3.0-beta-3</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -369,7 +365,7 @@
 		<dependency>
 			<groupId>net.sourceforge.stripes</groupId>
 			<artifactId>stripes</artifactId>
-			<version>1.5.3</version>
+			<version>1.5.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.directwebremoting</groupId>
@@ -379,7 +375,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.0.3</version>
+			<version>4.1.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
